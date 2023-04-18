@@ -1,0 +1,274 @@
+<!doctype html>
+<html>
+<head>
+    <title>Ejemplo 02 VBO</title>
+    <style>
+        body{ 
+            background-color: grey; 
+            font-family:Arial, Helvetica, sans-serif;                
+        }
+        canvas{ 
+            background-color: white; 
+        }
+        textarea{ 
+            background-color: black; 
+            background-color: white;
+        }
+        #titulo{
+            text-align:center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="titulo">		
+
+        <h1>Sistemas Gráficos</h1>
+        
+        <h2>WebGL Ejemplo 02 - Ejercicio Triangulos</h2>
+
+        <canvas id="my-canvas" width="900" height="500">
+            Your browser does not support the HTML5 canvas element.
+        </canvas>			
+
+    </div>
+
+    <!-- ************       vertex shader        ***************** !-->
+
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec3 aVertexColor;
+
+        varying highp vec4 vColor;
+
+        void main(void) {
+            gl_Position = vec4(aVertexPosition, 1.0);
+            vColor = vec4(aVertexColor, 1.0);
+        }
+    </script>
+
+    <!-- ************       fragment shader       **************** !-->        
+
+    <script id="shader-fs" type="x-shader/x-fragment">
+        varying highp vec4 vColor;
+        void main(void) {
+            gl_FragColor = vColor;
+        }
+    </script>
+
+    <script>
+
+        var gl = null,
+            canvas = null,
+            glProgram = null,
+            fragmentShader = null,
+            vertexShader = null;
+            
+        var vertexPositionAttribute = null,
+            trianglesVerticeBuffer = null,
+            vertexColorAttribute = null,
+            trianglesColorBuffer = null;
+            
+        function initWebGL(){
+
+            canvas = document.getElementById("my-canvas");  
+            try{
+                gl = canvas.getContext("webgl");                    
+            } catch(e) {
+                alert("Error al obtener el contexto");
+            }
+
+            if(gl){
+
+                setupWebGL();
+                initShaders();
+                setupBuffers();
+                drawScene();    
+                
+            }else{    
+                alert("Error: Su browser no soporta WebGL.");
+            }   
+
+        }
+        
+        function setupWebGL(){
+
+            //set the clear color
+            gl.clearColor(0, 46/255, 1, 1.0);     
+            gl.clear(gl.COLOR_BUFFER_BIT);     
+            
+            gl.viewport(0, 0, canvas.width, canvas.height);
+
+        }
+        
+        function initShaders(){
+
+            //get shader source
+            var fs_source = document.getElementById('shader-fs').innerHTML,
+                vs_source = document.getElementById('shader-vs').innerHTML;
+
+            //compile shaders    
+            vertexShader = makeShader(vs_source, gl.VERTEX_SHADER);
+            fragmentShader = makeShader(fs_source, gl.FRAGMENT_SHADER);
+            
+            //create program
+            glProgram = gl.createProgram();
+            
+            //attach and link shaders to the program
+            gl.attachShader(glProgram, vertexShader);
+            gl.attachShader(glProgram, fragmentShader);
+            gl.linkProgram(glProgram);
+
+            if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
+                alert("Unable to initialize the shader program.");
+            }
+            
+            //use program
+            gl.useProgram(glProgram);
+            
+        }
+        
+        function makeShader(src, type){
+
+            //compile the vertex shader
+            var shader = gl.createShader(type);
+            gl.shaderSource(shader, src);
+            gl.compileShader(shader);
+
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                alert("Error compiling shader: " + gl.getShaderInfoLog(shader));
+            }
+            return shader;
+        }
+        
+        function setupBuffers(){
+
+            var data = [
+                 0.15,-0.20, 0.00,        // vértice 1, triangulo 1
+                -0.15,-0.70, 0.00,        // vértice 2, triangulo 1    Blanco Superior
+                -0.15,-0.20, 0.00,        // vértice 3, triangulo 1
+
+                 0.15,-0.20, 0.00,        // vértice 1, triangulo 2
+                -0.15,-0.70, 0.00,        // vértice 2, triangulo 2    Blanco Inferior
+                 0.15,-0.70, 0.00,        // vértice 3, triangulo 2
+
+                -0.45,-0.20, 0.00,        // vértice 1, triangulo 3
+                -0.45,-0.70, 0.00,        // vértice 2, triangulo 3    Rosa Izquierdo
+                -0.15,-0.20, 0.00,        // vértice 3, triangulo 3
+
+                -0.15,-0.70, 0.00,        // vértice 1, triangulo 4
+                -0.45,-0.70, 0.00,        // vértice 2, triangulo 4    Verde Izquierdo
+                -0.15,-0.20, 0.00,        // vértice 3, triangulo 4
+
+                 0.15,-0.20, 0.00,        // vértice 1, triangulo 5
+                 0.45,-0.20, 0.00,        // vértice 2, triangulo 5    Rosa Derecho
+                 0.15,-0.70, 0.00,        // vértice 3, triangulo 5
+
+                 0.45,-0.70, 0.00,        // vértice 1, triangulo 6
+                 0.45,-0.20, 0.00,        // vértice 2, triangulo 6    Verde Derecho
+                 0.15,-0.70, 0.00,        // vértice 3, triangulo 6
+
+                 0.15, 0.30, 0.00,        // vértice 1, triangulo 7
+                 0.45, 0.30, 0.00,        // vértice 2, triangulo 7    Rosa Cuadrado Derecho Superior
+                 0.15,-0.20, 0.00,        // vértice 3, triangulo 7
+
+                 0.45,-0.20, 0.00,        // vértice 1, triangulo 8
+                 0.45, 0.30, 0.00,        // vértice 2, triangulo 8    Rosa Cuadrado Derecho Inferior
+                 0.15,-0.20, 0.00,        // vértice 3, triangulo 8
+
+                 0.45, 0.30, 0.00,        // vértice 1, triangulo 9
+                 0.45, 0.80, 0.00,        // vértice 2, triangulo 9    Amarillo Derecho
+                 0.15, 0.30, 0.00,        // vértice 3, triangulo 9
+
+                -0.45, 0.05, 0.00,        // vértice 1, triangulo 10
+                -0.45,-0.20, 0.00,        // vértice 2, triangulo 10   Rosa Rectangulo Izquierdo Superior
+                -0.15, 0.05, 0.00,        // vértice 3, triangulo 10
+
+                -0.45,-0.20, 0.00,        // vértice 1, triangulo 11
+                -0.15, 0.05, 0.00,        // vértice 2, triangulo 11   Rosa Rectangulo Izquierdo Inferior
+                -0.15,-0.20, 0.00,        // vértice 3, triangulo 11
+
+                -0.45, 0.05, 0.00,        // vértice 1, triangulo 12
+                -0.15, 0.55, 0.00,        // vértice 2, triangulo 12   Amarillo Izquierdo
+                -0.15, 0.05, 0.00,        // vértice 3, triangulo 12
+            ];
+            
+            trianglesVerticeBuffer = gl.createBuffer();                               // creo el buffer
+            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);                   // activo el buffer
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);   // cargo los datos en el buffer 
+        
+            var color = [
+                1,1,1,              // r,g,b vertice 1, triangulo 1
+                1,1,1,              // r,g,b vertice 2, triangulo 1    Blanco Superior
+                1,1,1,              // r,g,b vertice 3, triangulo 1
+
+                1,1,1,              // r,g,b vertice 1, triangulo 2
+                1,1,1,              // r,g,b vertice 2, triangulo 2    Blanco Inferior
+                1,1,1,              // r,g,b vertice 3, triangulo 2
+
+                1,0,1,              // r,g,b vertice 1, triangulo 3
+                1,0,1,              // r,g,b vertice 2, triangulo 3    Rosa Izquierdo
+                1,0,1,              // r,g,b vertice 3, triangulo 3
+
+                64/255,219/255,0,   // r,g,b vertice 1, triangulo 4
+                64/255,219/255,0,   // r,g,b vertice 2, triangulo 4    Verde Izquierdo                
+                64/255,219/255,0,   // r,g,b vertice 3, triangulo 4
+                
+                1,0,1,              // r,g,b vertice 1, triangulo 5
+                1,0,1,              // r,g,b vertice 2, triangulo 5    Rosa Derecho
+                1,0,1,              // r,g,b vertice 3, triangulo 5
+
+                64/255,219/255,0,   // r,g,b vertice 1, triangulo 6
+                64/255,219/255,0,   // r,g,b vertice 2, triangulo 6    Verde Derecho                
+                64/255,219/255,0,   // r,g,b vertice 3, triangulo 6
+
+                1,0,1,              // r,g,b vertice 1, triangulo 7
+                1,0,1,              // r,g,b vertice 2, triangulo 7   Rosa Cuadrado Derecho Superior
+                1,0,1,              // r,g,b vertice 3, triangulo 7
+
+                1,0,1,              // r,g,b vertice 1, triangulo 8
+                1,0,1,              // r,g,b vertice 2, triangulo 8   Rosa Cuadrado Derecho Inferior
+                1,0,1,              // r,g,b vertice 3, triangulo 8
+
+                234/255,185/255,0,  // r,g,b vertice 1, triangulo 9
+                234/255,185/255,0,  // r,g,b vertice 1, triangulo 9   Amarillo Derecho
+                234/255,185/255,0,  // r,g,b vertice 1, triangulo 9
+
+                1,0,1,              // r,g,b vertice 1, triangulo 10
+                1,0,1,              // r,g,b vertice 2, triangulo 10  Rosa Rectangulo Derecho Superior
+                1,0,1,              // r,g,b vertice 3, triangulo 10
+
+                1,0,1,              // r,g,b vertice 1, triangulo 11
+                1,0,1,              // r,g,b vertice 2, triangulo 11  Rosa Rectangulo Derecho Inferior
+                1,0,1,              // r,g,b vertice 3, triangulo 11
+
+                234/255,185/255,0,  // r,g,b vertice 1, triangulo 12
+                234/255,185/255,0,  // r,g,b vertice 1, triangulo 12  Amarillo Izquierdo
+                234/255,185/255,0,  // r,g,b vertice 1, triangulo 12
+            ];
+            
+            trianglesColorBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesColorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(color), gl.STATIC_DRAW);    
+        }
+        
+        function drawScene(){
+
+            vertexPositionAttribute = gl.getAttribLocation(glProgram, "aVertexPosition");
+            gl.enableVertexAttribArray(vertexPositionAttribute);
+            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+            gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+            vertexColorAttribute = gl.getAttribLocation(glProgram, "aVertexColor");
+            gl.enableVertexAttribArray(vertexColorAttribute);
+            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesColorBuffer);
+            gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 0, 0);
+
+            gl.drawArrays(gl.TRIANGLES, 0,36);
+        }
+
+        window.onload=initWebGL;
+
+    </script>        
+</body>
+</html>
