@@ -40,8 +40,8 @@
             vec4 textureColor = texture2D(uSampler, vec2(uv.s, uv.t));         
             
 
-            float x = (uv.x - 0.5)*2;
-            float z = (uv.y - 0.5)*2;
+            float x = (uv.x - 0.5)*2.0;
+            float z = (uv.y - 0.5)*2.0;
             float r = x*x+z*z;
             float y = -0.5-0.2*exp(-10.0*r)*sin(50.0*r-50.0*time);
 
