@@ -1,0 +1,274 @@
+<!doctype html>
+<html>
+    <head>
+        <title></title>        
+        <style>
+            body{ background-color: grey; }
+            canvas{ background-color: black; }
+			textarea{ background-color: black; foreground-color: white;}
+        </style>
+    </head>
+    <body>
+
+    	<center>    		            
+            <canvas id="my-canvas" width="1000" height="800">
+            	Your browser does not support the HTML5 canvas element.
+    		</canvas>    		
+    	</center>
+
+        <script type="text/javascript" src="js/gl-matrix.js"></script>
+        <script src="modulo-geometria.js"></script>
+        <script type="module" src="objeto3D.js"></script>
+        <script id="shader-vs" type="x-shader/x-vertex">
+
+            precision highp float;
+
+            attribute vec3 aVertexPosition;
+            attribute vec3 aVertexNormal;
+
+            uniform mat4 modelMatrix;            
+            uniform mat4 viewMatrix;
+            uniform mat4 projMatrix;
+
+            uniform mat4 normalMatrix;
+
+            varying vec3 vNormal;    
+            varying vec3 vPosWorld;  
+
+            void main(void) {
+                gl_Position = projMatrix * viewMatrix * modelMatrix * vec4(aVertexPosition, 1.0);
+
+                vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz;    //la posicion en coordenadas de mundo
+                vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz;       //la normal en coordenadas de mundo                
+                
+            }
+        </script>
+
+        <script id="shader-fs" type="x-shader/x-fragment">
+            precision highp float;
+            varying vec3 vNormal;
+            varying vec3 vPosWorld;
+
+            void main(void) {
+
+                vec3 lightVec=normalize(vec3(0.0,3.0,5.0)-vPosWorld);
+                vec3 diffColor=mix(vec3(0.7,0.7,0.7),(vNormal),0.4);
+                vec3 color=dot(lightVec,normalize(vNormal))*diffColor+vec3(0.2,0.2,0.2);
+
+               gl_FragColor = vec4(color,1.0);
+            }
+        </script>
+        
+        <script type="module" >
+
+            import {Objeto3D}  from './objeto3D.js';
+            import {SuperficieBarrido} from './superficieBarrido.js'
+
+            var mat4=glMatrix.mat4;
+            var vec3=glMatrix.vec3;
+
+            var gl = null,
+            canvas = null,
+
+            glProgram = null,
+            fragmentShader = null,
+            vertexShader = null;
+                
+               
+            var modelMatrix = mat4.create();
+            var viewMatrix = mat4.create();
+            var projMatrix = mat4.create();
+            
+            var escena = null
+            var hijo1 = null
+            var hijo2 = null
+            
+            function initWebGL(){
+
+                canvas = document.getElementById("my-canvas");  
+
+                try{
+                    gl = canvas.getContext("webgl");      
+
+                }catch(e){
+                    alert(  "Error: Your browser does not appear to support WebGL.");
+                }
+
+                if(gl) {
+
+                    setupWebGL();
+                    initShaders();
+                    
+                    var lvl0 = mat4.fromValues(
+                        1,0,0,0,
+                        0,1,0,0,
+                        0,0,1,0,
+                        0,0,0,1
+                    )
+                    var lvl1 = mat4.fromValues(
+                        //Math.cos(Math.PI/2),-Math.sin(Math.PI/2),0,0,
+                        //Math.sin(Math.PI/2),Math.cos(Math.PI/2),0,0,
+                        1,0,0,0,
+                        0,1,0,0,
+                        0,0,1,1,
+                        0,0,0,1
+                    )
+
+                    var lvl2 = mat4.fromValues(
+                        Math.cos(Math.PI),-Math.sin(Math.PI),0,0,
+                        Math.sin(Math.PI),Math.cos(Math.PI),0,0,
+                        0,0,1,2,
+                        0,0,0,1
+                    )
+
+                    mat4.transpose(lvl1,lvl1)
+                    mat4.transpose(lvl2,lvl2)
+                    var poligono = []
+                    var n = 5
+                    var alpha = 360/(180*n)
+                    for(let i = 0; i <n; i++){
+                        poligono.push(vec3.fromValues(Math.cos(Math.PI*alpha*i),Math.sin(Math.PI*alpha*i),0))
+                        poligono.push(vec3.fromValues(0.5*Math.cos(Math.PI*alpha*i+Math.PI*alpha/2),0.5*Math.sin(Math.PI*alpha*i+Math.PI*alpha/2),0))
+                        
+                    }
+                    poligono.push(vec3.fromValues(Math.cos(0),Math.sin(0),0))
+
+                    
+                    
+                    var recorrido = [lvl0,lvl1]
+          
+                    var sup = new SuperficieBarrido(poligono,recorrido)
+                    
+                    escena = new Objeto3D();
+                    var buffers = crearGeometria("tubo",40,40)
+                    //escena.setGeometria(buffers[0],buffers[1],buffers[2]) 
+                    escena.setGeometria(sup.getPositionBuffer(),sup.getNormalBuffer(),sup.getIndexBuffer())
+
+
+                    //escena.setRotacion([Math.PI/2, vec3.fromValues(1,0,0)])
+                    escena.setPosicion(vec3.fromValues(0,-1,0))
+
+                    hijo1 = new Objeto3D()
+                    var buffersHijo = crearGeometria("esfera",30,30)
+                    hijo1.setGeometria(buffersHijo[0],buffersHijo[1],buffersHijo[2])
+
+                    hijo1.setPosicion(vec3.fromValues(-1,0,0))
+                    hijo1.setEscala(vec3.fromValues(0.5,0.5,0.5))
+                    hijo1.setRotacion([Math.PI*(1/2),vec3.fromValues(0,0,1)])
+
+                    hijo2 = new Objeto3D()
+                    hijo2.setGeometria(buffersHijo[0],buffersHijo[1],buffersHijo[2])
+
+                    hijo2.setPosicion(vec3.fromValues(3,0,0))
+                    hijo2.setEscala(vec3.fromValues(0.5,0.5,0.5))
+                    hijo2.setRotacion([Math.PI*(1/2),vec3.fromValues(0,0,1)])
+                    
+                    escena.agregarHijo(hijo1)
+                    escena.agregarHijo(hijo2)
+                    setupVertexShaderMatrix();
+                    tick();   
+
+                }else{    
+                    alert(  "Error: Your browser does not appear to support WebGL.");
+                }
+
+            }
+           
+
+            function setupWebGL(){
+                gl.enable(gl.DEPTH_TEST);
+                //set the clear color
+                gl.clearColor(0.1, 0.1, 0.2, 1.0);     
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     
+    
+                gl.viewport(0, 0, canvas.width, canvas.height);
+
+                // Matrix de Proyeccion Perspectiva
+
+                mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 100.0);
+                
+                mat4.identity(modelMatrix);
+                //mat4.rotate(modelMatrix,modelMatrix, -1.57078, [1.0, 0.0, 0.0]);
+
+                mat4.identity(viewMatrix);
+                mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, -10.0]);
+            }
+                    
+                    
+            function initShaders() {
+                //get shader source
+                var fs_source = document.getElementById('shader-fs').innerHTML,
+                    vs_source = document.getElementById('shader-vs').innerHTML;
+
+                //compile shaders    
+                vertexShader = makeShader(vs_source, gl.VERTEX_SHADER);
+                fragmentShader = makeShader(fs_source, gl.FRAGMENT_SHADER);
+                
+                //create program
+                glProgram = gl.createProgram();
+                
+                //attach and link shaders to the program
+                gl.attachShader(glProgram, vertexShader);
+                gl.attachShader(glProgram, fragmentShader);
+                gl.linkProgram(glProgram);
+
+                if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
+                    alert("Unable to initialize the shader program.");
+                }
+                
+                //use program
+                gl.useProgram(glProgram);
+            }
+            
+            function makeShader(src, type){
+                //compile the vertex shader
+                var shader = gl.createShader(type);
+                gl.shaderSource(shader, src);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.log("Error compiling shader: " + gl.getShaderInfoLog(shader));
+                }
+                return shader;
+            }
+
+
+            function setupVertexShaderMatrix(){
+                var viewMatrixUniform  = gl.getUniformLocation(glProgram, "viewMatrix");
+                var projMatrixUniform  = gl.getUniformLocation(glProgram, "projMatrix");
+
+                gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
+                gl.uniformMatrix4fv(projMatrixUniform, false, projMatrix);
+            }                  
+            
+            function drawScene(){
+                setupVertexShaderMatrix()
+                escena.dibujar(modelMatrix,gl,glProgram)
+            }
+
+ 
+            var offset = 0
+
+            function animate(){
+                offset += 0.01
+
+                escena.setRotacion([offset,vec3.fromValues(1,1,1)])
+
+                //hijo1.setPosicion(vec3.fromValues(-2+Math.sin(offset),0,0))
+                //hijo2.setPosicion(vec3.fromValues(3+Math.sin(offset),0,0))
+            }
+            
+            function tick(){
+
+                requestAnimationFrame(tick);
+                drawScene();
+                animate();
+            }
+
+            window.onload=initWebGL;
+
+        </script>
+
+
+    </body>
+</html>
