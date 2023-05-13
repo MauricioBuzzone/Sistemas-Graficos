@@ -13,18 +13,16 @@ export class SuperficieBarrido {
 
         for (let i = 0; i < this.recorrido.length; i++) {
           let matrizDeNivel = this.recorrido[i];
-          console.log("Matriz de nivel",i,matrizDeNivel)
 
           for (let j = 0; j < this.poligono.length; j++) {
             let vertice = this.poligono[j];     
             let verticeNiveli = vec4.create()
             
-            console.log(glMatrix.vec4.transformMat4(
+            glMatrix.vec4.transformMat4(
               verticeNiveli,
               vec4.fromValues(vertice[0],vertice[1],vertice[2],1.0),
-              matrizDeNivel))
+              matrizDeNivel)
             
-            console.log("Vertice convertido",verticeNiveli)
             positionBuffer.push(verticeNiveli[0])
             positionBuffer.push(verticeNiveli[1])
             positionBuffer.push(verticeNiveli[2])

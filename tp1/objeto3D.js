@@ -26,7 +26,7 @@ export class Objeto3D {
         mat4.scale(this.matrizModelado,this.matrizModelado,this.escala)
     }
   
-    dibujar(matPadre, gl, glProgram) {
+    dibujar(matPadre, gl, glProgram, viewMatrix) {
         // Método público para dibujar el objeto en pantalla, se recibe la matriz del padre
         // En este método se llamaría a las funciones pertinentes de WebGL para dibujar el objeto
         // aplicando la matriz de transformación final (matPadre * matrizModelado)
@@ -40,7 +40,8 @@ export class Objeto3D {
             var normalMatrixUniform  = gl.getUniformLocation(glProgram, "normalMatrix");
 
             var normalMatrix = mat4.create();
-            mat4.invert(normalMatrix,m)
+            mat4.multiply(normalMatrix,viewMatrix,m)
+            mat4.invert(normalMatrix,normalMatrix)
             mat4.transpose(normalMatrix,normalMatrix)
 
             gl.uniformMatrix4fv(modelMatrixUniform, false,m);
@@ -80,7 +81,7 @@ export class Objeto3D {
             
         }
 
-        for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl, glProgram);
+        for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl, glProgram,viewMatrix);
     }
   
     setGeometria(posBuffer, nrmBuffer, indexBuffer) {

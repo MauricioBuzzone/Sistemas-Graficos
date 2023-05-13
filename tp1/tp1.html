@@ -4,18 +4,37 @@
         <title></title>        
         <style>
             body{ background-color: grey; }
-            canvas{ background-color: black; }
+            canvas{ background-color: rgb(110, 196, 218); }
 			textarea{ background-color: black; foreground-color: white;}
+
+            *{
+            font-family: Arial, Helvetica, sans-serif;   
+            }
+            #log {
+                position: absolute;
+                top:50px;
+                left: 100px;
+                z-index: 300;
+            }
         </style>
     </head>
     <body>
-
-    	<center>    		            
+        </div>
+            <div id="log">
+                Up: w<br/>
+                Down: s<br/>
+                Left: a<br/>
+                Right: d<br/>
+                Zoom: c<br/>
+                ZoomOut: z<br/>
+            </div>    
+    	<center>
+            		            
             <canvas id="my-canvas" width="1000" height="800">
             	Your browser does not support the HTML5 canvas element.
     		</canvas>    		
     	</center>
-
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script type="text/javascript" src="js/gl-matrix.js"></script>
         <script src="modulo-geometria.js"></script>
         <script type="module" src="objeto3D.js"></script>
@@ -63,6 +82,8 @@
 
             import {Objeto3D}  from './objeto3D.js';
             import {SuperficieBarrido} from './superficieBarrido.js'
+            import {Curva} from './curvas.js'
+
 
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
@@ -82,7 +103,9 @@
             var escena = null
             var hijo1 = null
             var hijo2 = null
-            
+
+
+           
             function initWebGL(){
 
                 canvas = document.getElementById("my-canvas");  
@@ -98,19 +121,74 @@
 
                     setupWebGL();
                     initShaders();
-                    
+
+
+                    var carretera = new Curva("bezier2",[
+                        vec3.fromValues(-10,-1,0),
+                        vec3.fromValues(0,-1,0),
+                        vec3.fromValues(10,-1,0),
+                    ])
+
+                    carretera.concat( new Curva("bezier2",[
+                        vec3.fromValues(10,-1,0),
+                        vec3.fromValues(10,0,0),
+                        vec3.fromValues(10,0,0)
+                    ]))
+
+                    carretera.concat( new Curva("bezier2",[
+                        vec3.fromValues(10,0,0),
+                        vec3.fromValues(9,0,0),
+                        vec3.fromValues(8,0,0)
+                    ]))
+
+                    carretera.concat( new Curva("bezier3",[
+                        vec3.fromValues(8,0,0),
+                        vec3.fromValues(7.8,0,0),
+                        vec3.fromValues(7.8,-0.2,0),
+                        vec3.fromValues(7.6,-0.2,0)
+                    ]))
+
+                    carretera.concat( new Curva("bezier2",[
+                        vec3.fromValues(7.6,-0.2,0),
+                        vec3.fromValues(-7.6,-0.2,0),
+                        vec3.fromValues(-7.6,-0.2,0)
+                    ]))
+
+                    carretera.concat( new Curva("bezier3",[
+                        vec3.fromValues(-7.6,-0.2,0),
+                        vec3.fromValues(-7.8,-0.2,0),
+                        vec3.fromValues(-7.8,0,0),
+                        vec3.fromValues(-8,0,0),
+                    ]))
+
+                    carretera.concat( new Curva("bezier2",[
+                        vec3.fromValues(-8,0,0),  
+                        vec3.fromValues(-9,0,0),
+                        vec3.fromValues(-10,0,0),
+                    ]))
+
+                    carretera.concat( new Curva("bezier2",[
+                        vec3.fromValues(-10,0,0), 
+                        vec3.fromValues(-10,0,0), 
+                        vec3.fromValues(-10,-1,0), 
+                    ]))
+
+                    var [discretizacion,
+                        discretizacionTang,
+                        discretizacionNor,
+                        discretizacionBiNor] = carretera.getDiscretizacion(0.1)
+
+
                     var lvl0 = mat4.fromValues(
                         1,0,0,0,
                         0,1,0,0,
-                        0,0,1,0,
+                        0,0,1,-10,
                         0,0,0,1
                     )
                     var lvl1 = mat4.fromValues(
-                        //Math.cos(Math.PI/2),-Math.sin(Math.PI/2),0,0,
-                        //Math.sin(Math.PI/2),Math.cos(Math.PI/2),0,0,
                         1,0,0,0,
                         0,1,0,0,
-                        0,0,1,1,
+                        0,0,1,10,
                         0,0,0,1
                     )
 
@@ -122,7 +200,7 @@
                     )
 
                     mat4.transpose(lvl1,lvl1)
-                    mat4.transpose(lvl2,lvl2)
+                    mat4.transpose(lvl0,lvl0)
                     var poligono = []
                     var n = 5
                     var alpha = 360/(180*n)
@@ -131,40 +209,29 @@
                         poligono.push(vec3.fromValues(0.5*Math.cos(Math.PI*alpha*i+Math.PI*alpha/2),0.5*Math.sin(Math.PI*alpha*i+Math.PI*alpha/2),0))
                         
                     }
+                    
                     poligono.push(vec3.fromValues(Math.cos(0),Math.sin(0),0))
 
                     
                     
                     var recorrido = [lvl0,lvl1]
-          
-                    var sup = new SuperficieBarrido(poligono,recorrido)
+                    var sup = new SuperficieBarrido(discretizacion,recorrido)
                     
                     escena = new Objeto3D();
-                    var buffers = crearGeometria("tubo",40,40)
-                    //escena.setGeometria(buffers[0],buffers[1],buffers[2]) 
-                    escena.setGeometria(sup.getPositionBuffer(),sup.getNormalBuffer(),sup.getIndexBuffer())
-
-
-                    //escena.setRotacion([Math.PI/2, vec3.fromValues(1,0,0)])
-                    escena.setPosicion(vec3.fromValues(0,-1,0))
-
-                    hijo1 = new Objeto3D()
-                    var buffersHijo = crearGeometria("esfera",30,30)
-                    hijo1.setGeometria(buffersHijo[0],buffersHijo[1],buffersHijo[2])
-
-                    hijo1.setPosicion(vec3.fromValues(-1,0,0))
-                    hijo1.setEscala(vec3.fromValues(0.5,0.5,0.5))
-                    hijo1.setRotacion([Math.PI*(1/2),vec3.fromValues(0,0,1)])
-
-                    hijo2 = new Objeto3D()
-                    hijo2.setGeometria(buffersHijo[0],buffersHijo[1],buffersHijo[2])
-
-                    hijo2.setPosicion(vec3.fromValues(3,0,0))
-                    hijo2.setEscala(vec3.fromValues(0.5,0.5,0.5))
-                    hijo2.setRotacion([Math.PI*(1/2),vec3.fromValues(0,0,1)])
+                    escena.setPosicion(vec3.fromValues(0,0,0))
                     
+                    var plano = new Objeto3D()
+                    var buffersPlano = crearGeometria("plano",40,40)
+                    plano.setGeometria(buffersPlano[0],buffersPlano[1],buffersPlano[2]) 
+                    plano.setEscala(vec3.fromValues(10,10,10))
+                    plano.setPosicion(vec3.fromValues(0,-10,0))
+                    escena.agregarHijo(plano)
+
+                    hijo1 = new Objeto3D() //carretera
+                    hijo1.setGeometria(sup.getPositionBuffer(),sup.getNormalBuffer(),sup.getIndexBuffer())
+                    hijo1.setPosicion(vec3.fromValues(0,-4,0))
                     escena.agregarHijo(hijo1)
-                    escena.agregarHijo(hijo2)
+                    
                     setupVertexShaderMatrix();
                     tick();   
 
@@ -188,10 +255,10 @@
                 mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 100.0);
                 
                 mat4.identity(modelMatrix);
-                //mat4.rotate(modelMatrix,modelMatrix, -1.57078, [1.0, 0.0, 0.0]);
+                //mat4.rotate(modelMatrix,modelMatrix, -1.57078, [0.0, 0.0, 1.0]);
 
                 mat4.identity(viewMatrix);
-                mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, -10.0]);
+                mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, 10.0]);
             }
                     
                     
@@ -243,17 +310,58 @@
             
             function drawScene(){
                 setupVertexShaderMatrix()
-                escena.dibujar(modelMatrix,gl,glProgram)
+                escena.dibujar(modelMatrix,gl,glProgram,viewMatrix)
             }
 
  
             var offset = 0
+            var radio = 30
+            var alpha = Math.PI*3/2
+            var beta = Math.PI/2
+            var speed = 0.01
+            $('body').on("keydown",function(event){
+                
+                switch(event.key){
+                    case "a":
+                        alpha+=speed
+                    break;
 
+                    case "d":
+                        alpha-=speed
+                    break;
+
+                    case "w":
+                        beta-=speed
+                    break;
+
+                    case "s":
+                        beta+=speed
+                    break;
+
+                    case "z":
+                        radio+=speed*10
+                    break;
+                    
+                    case "c":
+                        radio-=speed*10
+                    break;
+                }
+                if (beta<0) beta=0;
+		        if (beta>Math.PI) beta=Math.PI;
+            });   
             function animate(){
-                offset += 0.01
+                offset += 0.1
 
-                escena.setRotacion([offset,vec3.fromValues(1,1,1)])
+                //hijo1.setRotacion([offset,vec3.fromValues(1,1,1)])
+                mat4.identity(viewMatrix)
+               
 
+                var x = radio * Math.sin(beta)* Math.cos(alpha)
+                var z = radio * Math.sin(beta)* Math.sin(alpha)
+                var y = radio * Math.cos(beta)
+                mat4.lookAt(viewMatrix, [x,y,z], [0,0,0], [0,1,0])
+
+            
                 //hijo1.setPosicion(vec3.fromValues(-2+Math.sin(offset),0,0))
                 //hijo2.setPosicion(vec3.fromValues(3+Math.sin(offset),0,0))
             }
