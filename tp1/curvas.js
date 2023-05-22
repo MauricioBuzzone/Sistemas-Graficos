@@ -88,7 +88,7 @@ export class Curva {
             }
 
             var tangente = vec3.fromValues(xt,yt,zt)
-            var binormal = vec3.fromValues(0,0,-1)
+            var binormal = vec3.fromValues(0,0,1)
             var normal = vec3.create()
             vec3.cross(normal, binormal, tangente);
             vec3.normalize(normal, normal);
