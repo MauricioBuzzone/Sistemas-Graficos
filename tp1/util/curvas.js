@@ -1,12 +1,13 @@
-var vec3=glMatrix.vec3;
+import {Punto} from './punto.js'
 
+var vec3=glMatrix.vec3;
 export class Curva {
     constructor(tipo, puntosDeControl){
         this.bases = []
         this.basesder = []
         this.puntosDeControl= []
         this.curvas = []
-
+        this.biNormal = vec3.fromValues(0,0,-1)
         this.setBases(tipo)
         this.setPuntosDeControl(puntosDeControl)
     }
@@ -61,6 +62,10 @@ export class Curva {
 
     }
 
+    setBiNormal(biNormal){
+
+        this.biNormal=biNormal
+    }
     setPuntosDeControl(puntosDeControl){
         this.puntosDeControl = puntosDeControl
     }
@@ -68,13 +73,10 @@ export class Curva {
     concat(curva){
         this.curvas.push(curva)
     }
+
     getDiscretizacion(step){
-        var discretizacion = []
-        var discretizacionTang = []
-        var discretizacionNor = []
-        var discretizacionBiNor = []
 
-
+        var puntos = []
         for(let u=0; u<=1; u+=step){
             var x = 0, y = 0, z = 0
             var xt = 0, yt = 0, zt = 0
@@ -82,34 +84,34 @@ export class Curva {
             for(let i=0; i < this.puntosDeControl.length; i++){
                 x += this.bases[i](u)*this.puntosDeControl[i][0]
                 y += this.bases[i](u)*this.puntosDeControl[i][1]
+                z += this.bases[i](u)*this.puntosDeControl[i][2]
 
                 xt += this.basesder[i](u)*this.puntosDeControl[i][0]
                 yt += this.basesder[i](u)*this.puntosDeControl[i][1]
+                zt += this.basesder[i](u)*this.puntosDeControl[i][2]
             }
 
+            var coords = vec3.fromValues(x,y,z)
+            var binormal = this.biNormal
             var tangente = vec3.fromValues(xt,yt,zt)
-            var binormal = vec3.fromValues(0,0,1)
-            var normal = vec3.create()
-            vec3.cross(normal, binormal, tangente);
+
+            var normal = vec3.fromValues(
+                binormal[1]*tangente[2]-binormal[2]*tangente[1],
+                binormal[2]*tangente[0]-binormal[0]*tangente[2],
+                binormal[0]*tangente[1]-binormal[1]*tangente[0])
+            
             vec3.normalize(normal, normal);
-
-
-            discretizacion.push(vec3.fromValues(x,y,z))
-            discretizacionTang.push(tangente)
-            discretizacionNor.push(normal)
-            discretizacionBiNor.push(binormal)
+            vec3.normalize(tangente, tangente);
+            puntos.push(new Punto(coords,tangente,normal,binormal))
         }
 
         for(let i = 0; i < this.curvas.length; i++){
-            var [discSig, discTangSig, discNorSig, discBiNorSig] = this.curvas[i].getDiscretizacion(step)
-
-            discretizacion = discretizacion.concat(discSig)
-            discretizacionTang = discretizacionTang.concat(discTangSig)
-            discretizacionNor = discretizacionNor.concat(discNorSig)
-            discretizacionBiNor = discretizacionBiNor.concat(discBiNorSig)
+            var puntosCurvasHijas = this.curvas[i].getDiscretizacion(step)
+            
+            puntos = puntos.concat(puntosCurvasHijas)
         }
 
-        return [discretizacion,discretizacionTang,discretizacionNor,discretizacionBiNor]
+        return puntos
     }
 }
 

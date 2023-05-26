@@ -1,5 +1,5 @@
 
-import {Curva} from '../curvas.js'
+import {Curva} from './curvas.js'
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 var radio = 0.5 
@@ -66,32 +66,28 @@ export class Torre{
     }
 
     getPerfil(step){
-        var [discretizacion,
-            discretizacionTang,
-            discretizacionNor,
-            discretizacionBiNor] = this.perfil.getDiscretizacion(step)
-        return discretizacion
+        var discr = this.perfil.getDiscretizacion(step)
+        return discr
     }
 
 
     getRecorrido(step){
-        var [disc,
-            discTang,
-            discNor,
-            discBiNor] = this.recorrido.getDiscretizacion(step)
-
+        var puntos = this.recorrido.getDiscretizacion(step)
         var recorrido = []
-        for(var i=0; i< disc.length; i++){
+        for(var i=0; i< puntos.length; i++){
+
+            var biNormal = puntos[i].getBiNormal()
+            var normal = puntos[i].getNormal()
+            var tang = puntos[i].getTang()
+            var coords = puntos[i].getCoords()
+
             var matrizLvli = mat4.fromValues(
-                discBiNor[i][0],discBiNor[i][1],discBiNor[i][2],0,
-                discNor[i][0],discNor[i][1],discNor[i][2],0,
-                discTang[i][0],discTang[i][1],discTang[i][2],0,
-                disc[i][0],disc[i][1],disc[i][2],1)
+                biNormal[0],biNormal[1],biNormal[2],0,
+                normal[0],normal[1],normal[2],0,
+                tang[0],tang[1],tang[2],0,
+                coords[0],coords[1],coords[2],1)
             
             recorrido.push(matrizLvli)
-            
-
-            console.log("Normal",discNor[i])
 
         }
         return recorrido

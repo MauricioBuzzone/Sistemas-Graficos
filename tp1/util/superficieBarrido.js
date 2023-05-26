@@ -1,3 +1,4 @@
+import { Punto } from "./punto.js";
 var mat4=glMatrix.mat4;
 var vec3=glMatrix.vec3;
 var vec4=glMatrix.vec4;
@@ -10,15 +11,16 @@ export class SuperficieBarrido {
 
     getPositionBuffer() {
         let positionBuffer = [];
-
+    
         for (let i = 0; i < this.recorrido.length; i++) {
           let matrizDeNivel = this.recorrido[i];
-
+   
           for (let j = 0; j < this.poligono.length; j++) {
-            let vertice = this.poligono[j];     
+            let vertice = this.poligono[j].getCoords();    
+
             let verticeNiveli = vec4.create()
             
-            glMatrix.vec4.transformMat4(
+            vec4.transformMat4(
               verticeNiveli,
               vec4.fromValues(vertice[0],vertice[1],vertice[2],1.0),
               matrizDeNivel)
@@ -34,38 +36,38 @@ export class SuperficieBarrido {
 
 
     getNormalBuffer() {
+      
         let normalBuffer = [];
         let sizePoligono = this.poligono.length;
    
 
         for (let i = 0; i < this.recorrido.length; i++) {
+          let matrizDeNivel = this.recorrido[i];
+          var normalMatrix = mat4.create();
+          mat4.invert(normalMatrix,matrizDeNivel)
+          mat4.transpose(normalMatrix,normalMatrix)
 
           for (let j = 0; j < sizePoligono; j++) {
-            let vertice = this.poligono[j];
-            let siguiente = this.poligono[(j + 1) % sizePoligono];
 
+            let normal = this.poligono[j].getNormal();
             
-            let tangente = glMatrix.vec3.sub(
-              glMatrix.vec3.create(),
-              vertice,
-              siguiente
-            );
+            vec4.transformMat4(
+              normal,
+              vec4.fromValues(normal[0],normal[1],normal[2],1.0),
+              normalMatrix)
 
-            let normal = glMatrix.vec3.cross(
-              glMatrix.vec3.create(),
-              tangente,
-              vec3.fromValues(0,0,-1)
-            );
-            normal = glMatrix.vec3.normalize(glMatrix.vec3.create(), normal);
+            vec3.normalize(normal, normal);
 
+          
             normalBuffer.push(normal[0])
             normalBuffer.push(normal[1])
             normalBuffer.push(normal[2])
+            
           }
 
         }
-        return normalBuffer;
-      }
+      return normalBuffer;
+    }
 
     getIndexBuffer(){
 

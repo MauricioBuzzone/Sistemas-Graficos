@@ -1,7 +1,8 @@
 
 import {Objeto3D}  from '../objeto3D.js';
-import {SuperficieBarrido} from '../superficieBarrido.js'
-import {Curva} from '../curvas.js'
+import {SuperficieBarrido} from './superficieBarrido.js'
+import {Curva} from './curvas.js'
+import { Punto } from './punto.js';
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
@@ -63,7 +64,7 @@ export class Carretera{
             vec3.fromValues(-15,0,0),
             vec3.fromValues(-10,0,0),
         ])
-
+        /*
         this.recorrido.concat( new Curva("bezier2",[
             vec3.fromValues(-10,0,0), 
             vec3.fromValues(0,5,0), 
@@ -75,32 +76,30 @@ export class Carretera{
             vec3.fromValues(15,0,0), 
             vec3.fromValues(20,0,0), 
         ]))
-
+        */
     }
 
     getPerfil(step){
-        var [discretizacion,
-            discretizacionTang,
-            discretizacionNor,
-            discretizacionBiNor] = this.perfil.getDiscretizacion(step)
-        console.log(discretizacion[0])
-        return discretizacion
+        var discr = this.perfil.getDiscretizacion(step)
+        return discr
     }
 
 
     getRecorrido(step){
-        var [disc,
-            discTang,
-            discNor,
-            discBiNor] = this.recorrido.getDiscretizacion(step)
-
+        var puntos = this.recorrido.getDiscretizacion(step)
         var recorrido = []
-        for(var i=0; i< disc.length; i++){
+        for(var i=0; i< puntos.length; i++){
+
+            var biNormal = puntos[i].getBiNormal()
+            var normal = puntos[i].getNormal()
+            var tang = puntos[i].getTang()
+            var coords = puntos[i].getCoords()
+
             var matrizLvli = mat4.fromValues(
-                discBiNor[i][0],discBiNor[i][1],discBiNor[i][2],0,
-                discNor[i][0],discNor[i][1],discNor[i][2],0,
-                discTang[i][0],discTang[i][1],discTang[i][2],0,
-                disc[i][0],disc[i][1],disc[i][2],1)
+                biNormal[0],biNormal[1],biNormal[2],0,
+                normal[0],normal[1],normal[2],0,
+                tang[0],tang[1],tang[2],0,
+                coords[0],coords[1],coords[2],1)
             
             recorrido.push(matrizLvli)
 
