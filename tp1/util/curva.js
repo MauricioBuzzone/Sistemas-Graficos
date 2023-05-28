@@ -1,20 +1,26 @@
 import {Punto} from './punto.js'
-
 var vec3=glMatrix.vec3;
+
+export const Bases = {
+	Bezier3: Symbol("Bezier3"),
+	Bezier2: Symbol("Bezier2"),
+	Bspline3: Symbol("Bspline3"),
+	Bspline2: Symbol("Bspline2")
+}
+
 export class Curva {
-    constructor(tipo, puntosDeControl){
+    constructor(base, puntosDeControl){
         this.bases = []
         this.basesder = []
         this.puntosDeControl= []
-        this.curvas = []
         this.biNormal = vec3.fromValues(0,0,-1)
-        this.setBases(tipo)
+        this.setBases(base)
         this.setPuntosDeControl(puntosDeControl)
     }
 
 
-    setBases(tipo){
-        if(tipo == "bezier3"){
+    setBases(base){
+        if(base == Bases.Bezier3){
             this.bases[0] = function(u) { return (1-u)*(1-u)*(1-u);}  // 1*(1-u) - u*(1-u) = 1-2u+u2  ,  (1-2u+u2) - u +2u2- u3 ,  1 - 3u +3u2 -u3
             this.bases[1] = function(u) { return 3*(1-u)*(1-u)*u; }   // 3*(1-u)*(u-u2) , 3*(u-u2-u2+u3), 3u -6u2+2u3
             this.bases[2] = function(u) { return 3*(1-u)*u*u;}        //3u2-3u3
@@ -27,7 +33,7 @@ export class Curva {
             this.basesder[3] = function(u) { return 3*u*u; }	      // 3u2
         }
 
-        if(tipo == "bezier2"){
+        if(base == Bases.Bezier2){
             this.bases[0] = function(u) { return (1-u)*(1-u);} 	      // (1-u)^2
             this.bases[1] = function(u) { return 2*u*(1-u); }	      // 2*u*(1-u)
             this.bases[2] = function(u) { return u*u;}			      // u^2
@@ -37,7 +43,7 @@ export class Curva {
             this.basesder[2] = function(u) { return 2*u; }	
         }
 
-        if(tipo == "bspline3"){
+        if(base == Bases.Bspline3){
             this.bases[0] = function(u) { return (1-3*u+3*u*u-u*u*u)*1/6;}  // (1 -3u +3u2 -u3)/6
             this.bases[1] = function(u) { return (4-6*u*u+3*u*u*u)*1/6; }   // (4  -6u2 +3u3)/6
             this.bases[2] = function(u) { return (1+3*u+3*u*u-3*u*u*u)*1/6} // (1 -3u +3u2 -3u3)/6
@@ -50,7 +56,7 @@ export class Curva {
         }
 
 
-        if(tipo == "bspline2"){
+        if(base == Bases.Bspline2){
             this.bases[0] = function(u) { return 0.5*(1-u)*(1-u);}           // 0.5*(1-u)^2
             this.bases[1] = function(u) { return 0.5+u*(1-u);} 		         // 0.5+ u*(1-u)
             this.bases[2] = function(u) { return 0.5*u*u; } 			     // 0.5*u^2
@@ -63,15 +69,11 @@ export class Curva {
     }
 
     setBiNormal(biNormal){
-
         this.biNormal=biNormal
     }
+
     setPuntosDeControl(puntosDeControl){
         this.puntosDeControl = puntosDeControl
-    }
-
-    concat(curva){
-        this.curvas.push(curva)
     }
 
     getDiscretizacion(step){
@@ -104,13 +106,6 @@ export class Curva {
             vec3.normalize(tangente, tangente);
             puntos.push(new Punto(coords,tangente,normal,binormal))
         }
-
-        for(let i = 0; i < this.curvas.length; i++){
-            var puntosCurvasHijas = this.curvas[i].getDiscretizacion(step)
-            
-            puntos = puntos.concat(puntosCurvasHijas)
-        }
-
         return puntos
     }
 }

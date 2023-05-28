@@ -1,5 +1,5 @@
 
-import {Curva} from './curvas.js'
+import {Curva} from './curva.js'
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 var radio = 0.5 

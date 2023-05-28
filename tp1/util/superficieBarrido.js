@@ -47,22 +47,23 @@ export class SuperficieBarrido {
           mat4.invert(normalMatrix,matrizDeNivel)
           mat4.transpose(normalMatrix,normalMatrix)
 
+
+
           for (let j = 0; j < sizePoligono; j++) {
 
-            let normal = this.poligono[j].getNormal();
-            
+            let normalpol = this.poligono[j].getNormal();
+            let normal = vec4.create()
             vec4.transformMat4(
               normal,
-              vec4.fromValues(normal[0],normal[1],normal[2],1.0),
+              vec4.fromValues(normalpol[0],normalpol[1],normalpol[2],1.0),
               normalMatrix)
 
             vec3.normalize(normal, normal);
-
           
             normalBuffer.push(normal[0])
             normalBuffer.push(normal[1])
             normalBuffer.push(normal[2])
-            
+          
           }
 
         }
