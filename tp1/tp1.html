@@ -127,27 +127,18 @@
                     let carretera = new Carretera(10)
                     let discretizacion = carretera.getPerfil(0.1)
                     let matrizlvl = carretera.getRecorrido(0.1)
-        
-
-               
-                
                     
-        
+                    let torre = new Torre(10)
+                    discretizacion = torre.getPerfil(0.1)
+                    matrizlvl = torre.getRecorrido(0.1)
+                    
+                    
                     var sup = new SuperficieBarrido(discretizacion,matrizlvl)
 
                     escena = new Objeto3D();
                     escena.setPosicion(vec3.fromValues(0,0,0))
                     
-
                     /*
-                    var plano = new Objeto3D()
-                    var buffersPlano = crearGeometria("plano",40,40)
-                    plano.setGeometria(buffersPlano[0],buffersPlano[1],buffersPlano[2]) 
-                    plano.setEscala(vec3.fromValues(10,10,10))
-                    plano.setPosicion(vec3.fromValues(0,-10,0))
-                    escena.agregarHijo(plano)
-                    */
-
                     var y = new Objeto3D()
                     var yBuffer = crearGeometria("tubo",40,40)
                     y.setGeometria(yBuffer[0],yBuffer[1],yBuffer[2]) 
@@ -170,7 +161,8 @@
                     x.setPosicion(vec3.fromValues(0,0,0))
                     x.setEscala(vec3.fromValues(0.02,1,0.02))
                     escena.agregarHijo(x)
-                    
+                    */
+
                     var esfera = new Objeto3D()
                     var buffersEsfera = crearGeometria("esfera",40,40)
                     esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2]) 
@@ -182,10 +174,10 @@
                     hijo1.setGeometria(sup.getPositionBuffer(),sup.getNormalBuffer(),sup.getIndexBuffer())
                     //hijo1.setPosicion(vec3.fromValues(0,-4,0))
                     //hijo1.setEscala(vec3.fromValues(0.5,1,1))
-                    hijo1.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+                    hijo1.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+
                     escena.agregarHijo(hijo1)
                           
-                    //setupVertexShaderMatrix();
                     tick();   
 
                 }else{    
@@ -308,7 +300,7 @@
             function animate(){
                 offset += 0.1
 
-                hijo1.setRotacion([offset*0.1,vec3.fromValues(0,1,0)])
+                //hijo1.setRotacion([offset*0.1,vec3.fromValues(0,1,0)])
                 mat4.identity(viewMatrix)
                
 

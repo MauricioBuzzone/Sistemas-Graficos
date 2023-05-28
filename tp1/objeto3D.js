@@ -141,7 +141,7 @@ export class Objeto3D {
 
             gl.drawElements( gl.TRIANGLE_STRIP, trianglesIndexBuffer.number_vertex_point, gl.UNSIGNED_SHORT, 0);    
             
-            this.dibujarNormales(gl)
+            //this.dibujarNormales(gl)
         }
 
         for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl, glProgram,viewMatrix,projMatrix);

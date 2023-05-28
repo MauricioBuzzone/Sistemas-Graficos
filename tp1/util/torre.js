@@ -1,73 +1,97 @@
 
-import {Curva} from './curva.js'
+import {Curva, Bases} from './curva.js'
+import { CurvaGenerica } from './curvaGenerica.js';
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
-var radio = 0.5 
 export class Torre{
 
-    constructor(){
-        this.perfil = new Curva("bezier2",[
-            vec3.fromValues(-5,radio,0),
-            vec3.fromValues(-2,radio,0),
-            vec3.fromValues(0,radio,0),
+    constructor(altura){
+        let tramo1 = altura/3
+        let tramo2 = 2*altura/3
+        let tramo3 = altura
+        let radio = 0.5
+        
+        this.perfil = new CurvaGenerica([
+            
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(0,0,0),
+                vec3.fromValues(0,-radio/2,0),
+                vec3.fromValues(0,-radio,0),
+            ]),
+            new Curva(Bases.Bezier3,[
+                vec3.fromValues(tramo1-2,-radio,0),
+                vec3.fromValues(tramo1+2,-radio,0),
+                vec3.fromValues(tramo1-2,-radio*2/3,0),
+                vec3.fromValues(tramo1+2,-radio*2/3,0),
+            ]),
+            new Curva(Bases.Bezier3,[
+                vec3.fromValues(tramo2-2,-radio*2/3,0),
+                vec3.fromValues(tramo2+2,-radio*2/3,0),
+                vec3.fromValues(tramo2-2,-radio/3,0),
+                vec3.fromValues(tramo2+2,-radio/3,0),
+            ]),
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(tramo2+2,-radio/3,0),
+                vec3.fromValues(tramo3/2,-radio/3,0),
+                vec3.fromValues(tramo3,-radio/3,0),
+            ]),
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(tramo3,-radio/3,0),
+                vec3.fromValues(tramo3,-radio/6,0),
+                vec3.fromValues(tramo3,0,0),
+            ]),
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(tramo3,0,0),
+                vec3.fromValues(tramo3,radio/6,0),
+                vec3.fromValues(tramo3,radio/3,0),
+            ]),
+            
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(tramo3,radio/3,0),
+                vec3.fromValues(tramo3/2,radio/3,0),
+                vec3.fromValues(tramo2+2,radio/3,0),
+            ]),
+            new Curva(Bases.Bezier3,[
+                vec3.fromValues(tramo2+2,radio/3,0),
+                vec3.fromValues(tramo2-2,radio/3,0),
+                vec3.fromValues(tramo2+2,radio*2/3,0),
+                vec3.fromValues(tramo2-2,radio*2/3,0),
+            ]),
+            new Curva(Bases.Bezier3,[
+                vec3.fromValues(tramo1+2,radio*2/3,0),
+                vec3.fromValues(tramo1-2,radio*2/3,0),
+                vec3.fromValues(tramo1+2,radio,0),
+                vec3.fromValues(tramo1-2,radio,0),
+            ]),
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(0,radio,0),
+                vec3.fromValues(0,radio/2,0),
+                vec3.fromValues(0,0,0),
+            ]),
         ])
 
-        this.perfil.concat( new Curva("bezier3",[
-            vec3.fromValues(0,radio,0),
-            vec3.fromValues(1,radio,0),
-            vec3.fromValues(1,radio*0.33,0),
-            vec3.fromValues(2,radio*0.33,0)
-        ]))
-
-        this.perfil.concat( new Curva("bezier2",[
-            vec3.fromValues(2,radio*0.33,0),
-            vec3.fromValues(5,radio*0.33,0),
-            vec3.fromValues(7,radio*0.33,0)
-        ]))
-
-        this.perfil.concat( new Curva("bezier3",[
-            vec3.fromValues(7,radio*0.33,0),
-            vec3.fromValues(8,radio*0.33,0),
-            vec3.fromValues(8,radio*0.05,0),
-            vec3.fromValues(9,radio*0.05,0)
-        ]))
-
-        this.perfil.concat( new Curva("bezier2",[
-            vec3.fromValues(9,radio*0.05,0),
-            vec3.fromValues(11,radio*0.05,0),
-            vec3.fromValues(14,radio*0.05,0)
-        ]))
+        this.recorrido = new CurvaGenerica([
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(0,0,0.00001),
+                vec3.fromValues(0,0.00001,0.00001),
+                vec3.fromValues(0,0.00001,0),
+            ]),
+            new Curva(Bases.Bezier2,[
+                vec3.fromValues(0,0.00001,0),
+                vec3.fromValues(0,0.00001,-0.00001),
+                vec3.fromValues(0,0,-0.00001),
 
 
-        this.recorrido = new Curva("bezier2",[
-            vec3.fromValues(0,0.5,0),  
-            vec3.fromValues(0.5,0.5,0),
-            vec3.fromValues(0.5,0,0),
+            ]),
+        
         ])
-
-        this.recorrido.concat( new Curva("bezier2",[
-            vec3.fromValues(0.5,0,0),
-            vec3.fromValues(0.5,-0.5,0), 
-            vec3.fromValues(0,-0.5,0), 
-        ]))
-       
-        this.recorrido.concat( new Curva("bezier2",[
-            vec3.fromValues(0,-0.5,0), 
-            vec3.fromValues(-0.5,-0.5,0), 
-            vec3.fromValues(-0.5,0,0), 
-        ]))
-
-        this.recorrido.concat( new Curva("bezier2",[
-            vec3.fromValues(-0.5,0,0), 
-            vec3.fromValues(-0.5,0.5,0), 
-            vec3.fromValues(0,0.5,0), 
-        ]))
-
-    }
+        this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
+}
 
     getPerfil(step){
-        var discr = this.perfil.getDiscretizacion(step)
-        return discr
+        return this.perfil.getDiscretizacion(step)
+
+
     }
 
 
