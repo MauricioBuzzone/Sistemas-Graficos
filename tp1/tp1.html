@@ -85,6 +85,7 @@
             import {Curva, Bases} from './util/curva.js'
             import {CurvaGenerica} from './util/curvaGenerica.js'
             import {Carretera} from './util/carretera.js'
+            import {Cable} from './util/cable.js'
             import {Terreno} from './util/Terreno.js'
             import {Torre} from './util/torre.js'
             import {Punto} from './util/punto.js'
@@ -150,51 +151,85 @@
                     carretera.setEscala(vec3.fromValues(0.28,1,2.5))
                     escena.agregarHijo(carretera)
 
-                    let torre = new Torre(25)
-                    discretizacion = torre.getPerfil(0.1)
-                    matrizlvl = torre.getRecorrido(0.1)
+                    let modeloTorre = new Torre(30)
+                    discretizacion = modeloTorre.getPerfil(0.1)
+                    matrizlvl = modeloTorre.getRecorrido(0.1)
                     var suptorre = new SuperficieBarrido(discretizacion,matrizlvl)
                     
-                    var Obj3Dtorre1 = new Objeto3D()
-                    Obj3Dtorre1.setGeometria(
+                    var torre1 = new Objeto3D()
+                    torre1.setGeometria(
                         suptorre.getPositionBuffer(),
                         suptorre.getNormalBuffer(),
                         suptorre.getIndexBuffer()
                     )
-                    Obj3Dtorre1.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-                    Obj3Dtorre1.setPosicion(vec3.fromValues(12.5,-10,2.5))
+                    torre1.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    //torre1.setPosicion(vec3.fromValues(12.5,-10,2.5))
 
-                    var Obj3Dtorre2 = new Objeto3D()
-                    Obj3Dtorre2.setGeometria(
+                    var torre2 = new Objeto3D()
+                    torre2.setGeometria(
                         suptorre.getPositionBuffer(),
                         suptorre.getNormalBuffer(),
                         suptorre.getIndexBuffer()
                     )
-                    Obj3Dtorre2.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-                    Obj3Dtorre2.setPosicion(vec3.fromValues(12.5,-10,-2.5))
+                    torre2.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    torre2.setPosicion(vec3.fromValues(12.5,-10,-2.5))
 
-                    var Obj3Dtorre3 = new Objeto3D()
-                    Obj3Dtorre3.setGeometria(
+                    var torre3 = new Objeto3D()
+                    torre3.setGeometria(
                         suptorre.getPositionBuffer(),
                         suptorre.getNormalBuffer(),
                         suptorre.getIndexBuffer()
                     )
-                    Obj3Dtorre3.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-                    Obj3Dtorre3.setPosicion(vec3.fromValues(-4.5,-10,2.5))
+                    torre3.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    torre3.setPosicion(vec3.fromValues(-4.5,-10,2.5))
 
-                    var Obj3Dtorre4 = new Objeto3D()
-                    Obj3Dtorre4.setGeometria(
+                    var torre4 = new Objeto3D()
+                    torre4.setGeometria(
                         suptorre.getPositionBuffer(),
                         suptorre.getNormalBuffer(),
                         suptorre.getIndexBuffer()
                     )
-                    Obj3Dtorre4.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-                    Obj3Dtorre4.setPosicion(vec3.fromValues(-4.5,-10,-2.5))
+                    torre4.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    torre4.setPosicion(vec3.fromValues(-4.5,-10,-2.5))
                     
-                    escena.agregarHijo(Obj3Dtorre1)
-                    escena.agregarHijo(Obj3Dtorre2)
-                    escena.agregarHijo(Obj3Dtorre3)
-                    escena.agregarHijo(Obj3Dtorre4)
+
+                    let nodo1 = new Objeto3D()
+                    nodo1.setPosicion(vec3.fromValues(12.5,-10,2.5))
+                    
+                    escena.agregarHijo(nodo1)
+                    nodo1.agregarHijo(torre1)
+                    escena.agregarHijo(torre2)
+                    escena.agregarHijo(torre3)
+                    escena.agregarHijo(torre4)
+                    
+                    let modeloCable = new Cable()
+                    discretizacion = modeloCable.getPerfil(0.1)
+                    matrizlvl = modeloCable.getRecorrido(0.05)
+                    var supcable = new SuperficieBarrido(discretizacion,matrizlvl)
+
+                    var cable = new Objeto3D()
+                    cable.setGeometria(
+                        supcable.getPositionBuffer(),
+                        supcable.getNormalBuffer(),
+                        supcable.getIndexBuffer()
+                    )
+                    cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+                    cable.setPosicion(vec3.fromValues(-8.5,11,0))
+                    cable.setEscala(vec3.fromValues(1,1.4,0.85))
+
+                    var cable2 = new Objeto3D()
+                    cable2.setGeometria(
+                        supcable.getPositionBuffer(),
+                        supcable.getNormalBuffer(),
+                        supcable.getIndexBuffer()
+                    )
+                    cable2.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+                    cable2.setPosicion(vec3.fromValues(-8.5,11,-5))
+                    cable2.setEscala(vec3.fromValues(1,1.4,0.85))
+
+                    nodo1.agregarHijo(cable)
+                    nodo1.agregarHijo(cable2)
+                    
                     
                     var esfera = new Objeto3D()
                     var buffersEsfera = crearGeometria("esfera",40,40)
