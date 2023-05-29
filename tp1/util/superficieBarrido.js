@@ -80,8 +80,8 @@ export class SuperficieBarrido {
       for (let i=0; i < filas_vertices - 1 ; i++) {
         for (let j=0; j < columnas_vertices ; j++) {
 
-          index_vert_sup = j + i  * columnas_vertices
-          index_vert_inf = j + (i + 1) * columnas_vertices
+          let index_vert_sup = j + i  * columnas_vertices
+          let index_vert_inf = j + (i + 1) * columnas_vertices
 
           indexBuffer.push(index_vert_sup)
           indexBuffer.push(index_vert_inf)

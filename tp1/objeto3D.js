@@ -21,12 +21,12 @@ export class Objeto3D {
     actualizarMatrizModelado() {
         // Método privado para actualizar la matriz de modelado según los atributos posición, rotación y escala
         mat4.identity(this.matrizModelado);
-        mat4.rotate(this.matrizModelado,this.matrizModelado,this.rotación[0],this.rotación[1])
         mat4.translate(this.matrizModelado,this.matrizModelado,this.posición)
+        mat4.rotate(this.matrizModelado,this.matrizModelado,this.rotación[0],this.rotación[1])
         mat4.scale(this.matrizModelado,this.matrizModelado,this.escala)
     }
   
-    dibujar(matPadre, gl, glProgram, viewMatrix, projMatrix) {
+    dibujar(matPadre, gl, viewMatrix, projMatrix) {
         // Método público para dibujar el objeto en pantalla, se recibe la matriz del padre
         // En este método se llamaría a las funciones pertinentes de WebGL para dibujar el objeto
         // aplicando la matriz de transformación final (matPadre * matrizModelado)
@@ -69,7 +69,7 @@ export class Objeto3D {
                 `varying vec3 vPosWorld;`+
                 `void main(void)`+
                 `{`+
-                    `vec3 lightVec=normalize(vec3(0.0,3.0,20.0)-vPosWorld);`+
+                    `vec3 lightVec=normalize(vec3(10.0,30.0,10.0)-vPosWorld);`+
                     `vec3 diffColor=mix(vec3(0.7,0.7,0.7),vNormal,0.4);`+
                     `vec3 color=dot(lightVec,vNormal)*diffColor+vec3(0.2,0.2,0.2);`+
                     `gl_FragColor = vec4(color,1.0);`+
@@ -144,7 +144,7 @@ export class Objeto3D {
             //this.dibujarNormales(gl)
         }
 
-        for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl, glProgram,viewMatrix,projMatrix);
+        for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl,viewMatrix,projMatrix);
     }
 
     dibujarNormales(gl){

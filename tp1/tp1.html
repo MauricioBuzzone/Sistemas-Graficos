@@ -85,6 +85,7 @@
             import {Curva, Bases} from './util/curva.js'
             import {CurvaGenerica} from './util/curvaGenerica.js'
             import {Carretera} from './util/carretera.js'
+            import {Terreno} from './util/Terreno.js'
             import {Torre} from './util/torre.js'
             import {Punto} from './util/punto.js'
             var mat4=glMatrix.mat4;
@@ -102,6 +103,8 @@
             var viewMatrix = mat4.create();
             var projMatrix = mat4.create();
             
+            var vertexShaderFile="vertex-shader.glsl";
+
             var escena = null
             var hijo1 = null
             var hijo2 = null
@@ -122,62 +125,84 @@
                 if(gl) {
 
                     setupWebGL();
-                    //initShaders();
-
-                    let carretera = new Carretera(10)
-                    let discretizacion = carretera.getPerfil(0.1)
-                    let matrizlvl = carretera.getRecorrido(0.1)
-                    
-                    let torre = new Torre(10)
-                    discretizacion = torre.getPerfil(0.1)
-                    matrizlvl = torre.getRecorrido(0.1)
-                    
-                    
-                    var sup = new SuperficieBarrido(discretizacion,matrizlvl)
 
                     escena = new Objeto3D();
                     escena.setPosicion(vec3.fromValues(0,0,0))
                     
-                    /*
-                    var y = new Objeto3D()
-                    var yBuffer = crearGeometria("tubo",40,40)
-                    y.setGeometria(yBuffer[0],yBuffer[1],yBuffer[2]) 
-                    y.setPosicion(vec3.fromValues(0,0,0))
-                    y.setEscala(vec3.fromValues(0.02,1,0.02))
-                    escena.agregarHijo(y)
+                    let terreno = new Terreno(0.1,0.1)
+                    terreno.setEscala(vec3.fromValues(1.25,1,1))
+                    terreno.setPosicion(vec3.fromValues(5,0,0))
+                    escena.agregarHijo(terreno)
+                    
+                    let modeloCarretera = new Carretera(5)
+                    let discretizacion = modeloCarretera.getPerfil(0.1)
+                    let matrizlvl = modeloCarretera.getRecorrido(0.1)
+                    var supCarretera = new SuperficieBarrido(discretizacion,matrizlvl)
 
-                    var z = new Objeto3D()
-                    var zBuffer = crearGeometria("tubo",40,40)
-                    z.setGeometria(zBuffer[0],zBuffer[1],zBuffer[2])
-                    z.setRotacion([Math.PI/2,vec3.fromValues(1,0,0)])
-                    z.setPosicion(vec3.fromValues(0,0,0))
-                    z.setEscala(vec3.fromValues(0.02,1,0.02))
-                    escena.agregarHijo(z)
+                    var carretera = new Objeto3D()
+                    carretera.setGeometria(
+                        supCarretera.getPositionBuffer(),
+                        supCarretera.getNormalBuffer(),
+                        supCarretera.getIndexBuffer()
+                    )
+                    carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+                    carretera.setPosicion(vec3.fromValues(5,1,0))
+                    carretera.setEscala(vec3.fromValues(0.28,1,2.5))
+                    escena.agregarHijo(carretera)
 
-                    var x = new Objeto3D()
-                    var xBuffer = crearGeometria("tubo",40,40)
-                    x.setGeometria(xBuffer[0],xBuffer[1],xBuffer[2])
-                    x.setRotacion([Math.PI/2,vec3.fromValues(0,0,1)])
-                    x.setPosicion(vec3.fromValues(0,0,0))
-                    x.setEscala(vec3.fromValues(0.02,1,0.02))
-                    escena.agregarHijo(x)
-                    */
+                    let torre = new Torre(25)
+                    discretizacion = torre.getPerfil(0.1)
+                    matrizlvl = torre.getRecorrido(0.1)
+                    var suptorre = new SuperficieBarrido(discretizacion,matrizlvl)
+                    
+                    var Obj3Dtorre1 = new Objeto3D()
+                    Obj3Dtorre1.setGeometria(
+                        suptorre.getPositionBuffer(),
+                        suptorre.getNormalBuffer(),
+                        suptorre.getIndexBuffer()
+                    )
+                    Obj3Dtorre1.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    Obj3Dtorre1.setPosicion(vec3.fromValues(12.5,-10,2.5))
 
+                    var Obj3Dtorre2 = new Objeto3D()
+                    Obj3Dtorre2.setGeometria(
+                        suptorre.getPositionBuffer(),
+                        suptorre.getNormalBuffer(),
+                        suptorre.getIndexBuffer()
+                    )
+                    Obj3Dtorre2.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    Obj3Dtorre2.setPosicion(vec3.fromValues(12.5,-10,-2.5))
+
+                    var Obj3Dtorre3 = new Objeto3D()
+                    Obj3Dtorre3.setGeometria(
+                        suptorre.getPositionBuffer(),
+                        suptorre.getNormalBuffer(),
+                        suptorre.getIndexBuffer()
+                    )
+                    Obj3Dtorre3.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    Obj3Dtorre3.setPosicion(vec3.fromValues(-4.5,-10,2.5))
+
+                    var Obj3Dtorre4 = new Objeto3D()
+                    Obj3Dtorre4.setGeometria(
+                        suptorre.getPositionBuffer(),
+                        suptorre.getNormalBuffer(),
+                        suptorre.getIndexBuffer()
+                    )
+                    Obj3Dtorre4.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    Obj3Dtorre4.setPosicion(vec3.fromValues(-4.5,-10,-2.5))
+                    
+                    escena.agregarHijo(Obj3Dtorre1)
+                    escena.agregarHijo(Obj3Dtorre2)
+                    escena.agregarHijo(Obj3Dtorre3)
+                    escena.agregarHijo(Obj3Dtorre4)
+                    
                     var esfera = new Objeto3D()
                     var buffersEsfera = crearGeometria("esfera",40,40)
                     esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2]) 
-                    esfera.setPosicion(vec3.fromValues(0,3,20))
+                    esfera.setPosicion(vec3.fromValues(10,30,10))
                     esfera.setEscala(vec3.fromValues(0.25,0.25,0.25))
                     escena.agregarHijo(esfera)
-
-                    hijo1 = new Objeto3D() //carretera
-                    hijo1.setGeometria(sup.getPositionBuffer(),sup.getNormalBuffer(),sup.getIndexBuffer())
-                    //hijo1.setPosicion(vec3.fromValues(0,-4,0))
-                    //hijo1.setEscala(vec3.fromValues(0.5,1,1))
-                    hijo1.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-
-                    escena.agregarHijo(hijo1)
-                          
+                    
                     tick();   
 
                 }else{    
@@ -197,7 +222,7 @@
 
                 // Matrix de Proyeccion Perspectiva
 
-                mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 100.0);
+                mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 150.0);
                 
                 mat4.identity(modelMatrix);
                 //mat4.rotate(modelMatrix,modelMatrix, -1.57078, [0.0, 0.0, 1.0]);
@@ -205,14 +230,13 @@
                 mat4.identity(viewMatrix);
                 mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, 20.0]);
             }
-                    
-                    
+                
             function initShaders() {
                 //get shader source
                 var fs_source = document.getElementById('shader-fs').innerHTML,
                     vs_source = document.getElementById('shader-vs').innerHTML;
                 
-                alert(vs_source)
+
                 //compile shaders    
                 vertexShader = makeShader(vs_source, gl.VERTEX_SHADER);
                 fragmentShader = makeShader(fs_source, gl.FRAGMENT_SHADER);
@@ -257,7 +281,7 @@
             
             function drawScene(){
                 //setupVertexShaderMatrix()
-                escena.dibujar(modelMatrix,gl,glProgram,viewMatrix,projMatrix)
+                escena.dibujar(modelMatrix,gl,viewMatrix,projMatrix)
             }
 
  
@@ -310,9 +334,6 @@
 
                 mat4.lookAt(viewMatrix, [x,y,z], [0,0,0], [0,1,0])
 
-            
-                //hijo1.setPosicion(vec3.fromValues(-2+Math.sin(offset),0,0))
-                //hijo2.setPosicion(vec3.fromValues(3+Math.sin(offset),0,0))
             }
             
             function tick(){

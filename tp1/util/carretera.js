@@ -54,7 +54,7 @@ export class Carretera{
         this.recorrido = new CurvaGenerica([
             new Curva(Bases.Bezier2,[
                 vec3.fromValues(0,0,-20),  
-                vec3.fromValues(0,0,-15),
+                vec3.fromValues(0,0,-12),
                 vec3.fromValues(0,0,-10)
             ]),
             new Curva(Bases.Bezier2,[
@@ -70,7 +70,7 @@ export class Carretera{
         ])
         this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
     }
-
+    
     getPerfil(step){
         return this.perfil.getDiscretizacion(step)
     }
