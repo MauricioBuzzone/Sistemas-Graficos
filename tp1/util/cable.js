@@ -17,7 +17,23 @@ export class Cable extends Objeto3D{
         this.supBarrido = new SuperficieBarrido()
     
         this.setPerfil()
-        this.setRecorrido(this.recorridoDefault)
+        this.setRecorridoDef()
+    }
+
+    dibujar(matPadre, gl, viewMatrix, projMatrix) {
+        if (this.buffers == null ){
+            this.buffers = this.supBarrido.getBuffers(
+                this.getPerfil(this.stepPerfil),
+                this.getRecorrido(this.stepRecorrido)
+            )
+        }
+    
+        this.setGeometria(
+            this.buffers[0], // positionBuffer
+            this.buffers[1], // normalBuffer
+            this.buffers[2], // indexBuffer
+        )
+        super.dibujar(matPadre, gl, viewMatrix, projMatrix)
     }
 
     getPerfil(step){
@@ -26,18 +42,16 @@ export class Cable extends Objeto3D{
 
     setRecorridoDef(){
         let puntosDeControl = [
-            vec3.fromValues(0,0,-25),
-            vec3.fromValues(0,2,-15),
+            vec3.fromValues(0,0,-5),
             vec3.fromValues(0,0,0),
-            vec3.fromValues(0,2,15),
-            vec3.fromValues(0,0,25),
+            vec3.fromValues(0,0,5),
         ]
 
         this.recorrido = new CurvaGenerica([
             new Curva(Bases.Bezier2,[
                 puntosDeControl[0],
+                puntosDeControl[1],
                 puntosDeControl[2],
-                puntosDeControl[4],
             ]),
         ])
 

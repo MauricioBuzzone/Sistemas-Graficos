@@ -19,15 +19,7 @@
         </style>
     </head>
     <body>
-        </div>
-            <div id="log">
-                Up: w<br/>
-                Down: s<br/>
-                Left: a<br/>
-                Right: d<br/>
-                Zoom: c<br/>
-                ZoomOut: z<br/>
-            </div>    
+        </div> 
     	<center>
             		            
             <canvas id="my-canvas" width="1000" height="800">
@@ -90,6 +82,7 @@
             import {Terreno} from './util/terreno.js'
             import {Torre} from './util/torre.js'
             import {Punto} from './util/punto.js'
+            import {Camara, Estrategia} from './util/camara.js'
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 
@@ -106,6 +99,7 @@
             var projMatrix = mat4.create();
             
             var vertexShaderFile="vertex-shader.glsl";
+            var camara = new Camara()
 
             var nodoPadre = null
             var hijo1 = null
@@ -121,8 +115,17 @@
                 generar:function(){
                     crearEscena()
                 },      
+                orbital:function(){
+                    setEstrategiaCamara(Estrategia.Orbital)
+                }, 
+                drone:function(){
+                    setEstrategiaCamara(Estrategia.Drone)
+                }, 
             };
 
+            function setEstrategiaCamara(estrategia){
+                camara.setEstrategia(estrategia)
+            }
             function initWebGL(){
 
                 canvas = document.getElementById("my-canvas");  
@@ -179,10 +182,11 @@
                 torres[2].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,2.25))
                 torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,-2.25))
             
+
+
+
                 let comeinzoPuente = carretera.getRecorridoDisc(0.5)[1].getCoords()
                 let finPuente = carretera.getRecorridoDisc(0.5)[7].getCoords()
-
-
                 let puntosDeControl = [
                     vec3.fromValues(0,comeinzoPuente[1],2*comeinzoPuente[2]),
                     vec3.fromValues(0,(escena.alturaTorre-5)*2/3,2*comeinzoPuente[2]*1/3),
@@ -192,8 +196,6 @@
                     vec3.fromValues(0,(escena.alturaTorre-5)*2/3,2*finPuente[2]*1/3),
                     vec3.fromValues(0,finPuente[1],2*finPuente[2]),
                 ]
-
-                console.log(puntosDeControl)
                 let recorridoCable = new CurvaGenerica([
                     new Curva(Bases.Bezier2,[
                         puntosDeControl[0],
@@ -212,37 +214,21 @@
                     ]),
                 ])
 
-                // Creo los cables del puente                
-                let modeloCable = new Cable()
-                modeloCable.setRecorrido(recorridoCable)
-
-                var supcable = new SuperficieBarrido(
-                    modeloCable.getPerfil(0.1),
-                    modeloCable.getRecorrido(0.05)
-                )
-
-                var cable = new Objeto3D()
-                cable.setGeometria(
-                    supcable.getPositionBuffer(),
-                    supcable.getNormalBuffer(),
-                    supcable.getIndexBuffer()
-                )
+                // Creo los cables del puente     
+                let cable = new Cable()
+                cable.setRecorrido(recorridoCable)
                 cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 cable.setPosicion(vec3.fromValues(0,-0.5,2.25))
+                nodoPadre.agregarHijo(cable)
 
-                var cable2 = new Objeto3D()
-                cable2.setGeometria(
-                    supcable.getPositionBuffer(),
-                    supcable.getNormalBuffer(),
-                    supcable.getIndexBuffer()
-                )
+                let cable2 = new Cable()
+                cable2.setRecorrido(recorridoCable)
                 cable2.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 cable2.setPosicion(vec3.fromValues(0,-0.5,-2.25))
-
-                nodoPadre.agregarHijo(cable)
                 nodoPadre.agregarHijo(cable2)
                 
-                
+
+                // Esfera que simula la fuente de luz
                 var esfera = new Objeto3D()
                 var buffersEsfera = crearGeometria("esfera",40,40)
                 esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2]) 
@@ -274,8 +260,12 @@
                 f1.add(escena, 's1', -10.0, 30.0).name("separacion tensores").step(1);
                 f1.add(escena, 'alturaRio', -10.0, 30.0).name("altura rio").step(1);
                 f1.add(escena, 'generar').name("generar");
-
                 f1.open(); 
+
+                var f2 = gui.addFolder('Camaras');	
+                f2.add(escena, 'orbital').name("Orbital");
+                f2.add(escena, 'drone').name("Drone");	
+                f2.open(); 
             };
 
 
@@ -303,53 +293,30 @@
 
  
             var offset = 0
-            var radio = 30
-            var alpha = Math.PI*3/2
-            var beta = Math.PI/2
-            var speed = 0.05
-            $('body').on("keydown",function(event){
-                switch(event.key){
-                    case "a":
-                        alpha+=speed
-                    break;
 
-                    case "d":
-                        alpha-=speed
-                    break;
-
-                    case "w":
-                        beta-=speed
-                    break;
-
-                    case "s":
-                        beta+=speed
-                    break;
-
-                    case "z":
-                        radio+=speed*10
-                    break;
-                    
-                    case "c":
-                        radio-=speed*10
-                    break;
-                }
-
-                if (radio < 0.5) radio = 0.5
-                if (beta<0.1) beta=0.1;
-		        if (beta>=Math.PI) beta=Math.PI;
-            });   
+ 
+            $("body").mousemove(function(event){camara.handler(event)});
+            $('body').mousedown(function(event){camara.handler(event)});
+            $('body').mouseup(function(event){camara.handler(event)});
+            $('body').on('mousewheel',function(event){camara.handler(event)});
+            $('body').on("keydown",function(event){camara.handler(event)})
+ 
             function animate(){
                 offset += 0.1
 
                 //hijo1.setRotacion([offset*0.1,vec3.fromValues(0,1,0)])
                 mat4.identity(viewMatrix)
                
-
+                /*
                 var x = radio * Math.sin(beta)* Math.cos(alpha)
                 var z = radio * Math.sin(beta)* Math.sin(alpha)
                 var y = radio * Math.cos(beta)
-
                 mat4.lookAt(viewMatrix, [x,y,z], [0,0,0], [0,1,0])
+                */
+
+                let view = camara.getViewParameters()
+                
+                mat4.lookAt(viewMatrix, view.eye, view.center, view.up)
 
             }
             

@@ -1,6 +1,6 @@
 var mat4=glMatrix.mat4;
 var vec3=glMatrix.vec3;
-
+var vec4=glMatrix.vec4;
 
 export class Objeto3D {
     constructor() {
@@ -232,6 +232,10 @@ export class Objeto3D {
     setPosicion(posición) {
         this.posición = posición
     }
+     
+    getPosicion(){
+        return this.posición
+    }
 
     setEscala(escala) {
         this.escala = escala
@@ -252,6 +256,17 @@ export class Objeto3D {
         if (index !== -1) {
             this.hijos.splice(index, 1);
         }
+    }
+
+    localToWorld(pos){
+        let worldPost = vec4.create()
+        this.actualizarMatrizModelado()
+        vec4.transformMat4(
+            worldPost,
+            vec4.fromValues(pos[0],pos[1],pos[2],1.0),
+            this.matrizModelado)
+        
+        return worldPost
     }
 }
   
