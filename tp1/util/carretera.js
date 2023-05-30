@@ -13,6 +13,7 @@ export class Carretera extends Objeto3D{
         this.recorrido = null
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
+        this.buffers = null
         this.supBarrido = new SuperficieBarrido()
 
         this.setPerfil()
@@ -20,15 +21,17 @@ export class Carretera extends Objeto3D{
     }
     
     dibujar(matPadre, gl, viewMatrix, projMatrix) {
-        let buffers = this.supBarrido.getBuffers(
-            this.getPerfil(this.stepPerfil),
-            this.getRecorrido(this.stepRecorrido)
-        )
-
+        if (this.buffers == null ){
+            this.buffers = this.supBarrido.getBuffers(
+                this.getPerfil(this.stepPerfil),
+                this.getRecorrido(this.stepRecorrido)
+            )
+        }
+    
         this.setGeometria(
-            buffers[0], // positionBuffer
-            buffers[1], // normalBuffer
-            buffers[2], // indexBuffer
+            this.buffers[0], // positionBuffer
+            this.buffers[1], // normalBuffer
+            this.buffers[2], // indexBuffer
         )
         super.dibujar(matPadre, gl, viewMatrix, projMatrix)
     }

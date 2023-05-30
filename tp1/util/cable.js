@@ -1,63 +1,91 @@
 
 import {Curva, Bases} from './curva.js'
 import { CurvaGenerica } from './curvaGenerica.js';
+import { Objeto3D } from '../objeto3D.js';
+import {SuperficieBarrido} from './superficieBarrido.js'
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
-export class Cable{
+export class Cable extends Objeto3D{
 
     constructor(){
-        
-        this.perfil = new CurvaGenerica([
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0.1,0,0),
-                vec3.fromValues(0.1,0.1,0),
-                vec3.fromValues(0,0.1,0),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0.1,0),
-                vec3.fromValues(-0.1,0.1,0),
-                vec3.fromValues(-0.1,0,0),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(-0.1,0,0),
-                vec3.fromValues(-0.1,-0.1,0),
-                vec3.fromValues(0,-0.1,0),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,-0.1,0),
-                vec3.fromValues(0.1,-0.1,0),
-                vec3.fromValues(0.1,0,0),
-            ]),
-        ])
-
-        this.recorrido = new CurvaGenerica([
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0,-25),
-                vec3.fromValues(0,2,-15),
-                vec3.fromValues(0,10,-10),
-
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,10,-10),
-                vec3.fromValues(0,0,0),
-                vec3.fromValues(0,10,10),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,10,10),
-                vec3.fromValues(0,2,15),
-                vec3.fromValues(0,0,25),
-            ]),
-        ])
-        this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
-}
+        super()
+        this.perfil = null
+        this.recorrido = null
+        this.stepPerfil = 0.1
+        this.stepRecorrido = 0.1
+        this.buffers = null
+        this.supBarrido = new SuperficieBarrido()
+    
+        this.setPerfil()
+        this.setRecorrido(this.recorridoDefault)
+    }
 
     getPerfil(step){
         return this.perfil.getDiscretizacion(step)
     }
-    
+
+    setRecorridoDef(){
+        let puntosDeControl = [
+            vec3.fromValues(0,0,-25),
+            vec3.fromValues(0,2,-15),
+            vec3.fromValues(0,0,0),
+            vec3.fromValues(0,2,15),
+            vec3.fromValues(0,0,25),
+        ]
+
+        this.recorrido = new CurvaGenerica([
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[0],
+                puntosDeControl[2],
+                puntosDeControl[4],
+            ]),
+        ])
+
+        this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
+    }
+
+    setPerfil(){
+        let puntosDeControl = [
+            vec3.fromValues(0.1,0,0),
+            vec3.fromValues(0.1,0.1,0),
+            vec3.fromValues(0,0.1,0),
+            vec3.fromValues(-0.1,0.1,0),
+            vec3.fromValues(-0.1,0,0),
+
+            vec3.fromValues(-0.1,-0.1,0),
+            vec3.fromValues(0,-0.1,0),
+            vec3.fromValues(0.1,-0.1,0),
+            vec3.fromValues(0.1,0,0),
+        ]
+
+        this.perfil = new CurvaGenerica([
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[0],
+                puntosDeControl[1],
+                puntosDeControl[2],
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[2],
+                puntosDeControl[3],
+                puntosDeControl[4],
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[4],
+                puntosDeControl[5],
+                puntosDeControl[6],            
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[6],
+                puntosDeControl[7],
+                puntosDeControl[8],   
+            ]),
+        ])
+
+    }
     setRecorrido(recorrido){
         this.recorrido = recorrido
     }
+
     getRecorrido(step){
         var puntos = this.recorrido.getDiscretizacion(step)
         var recorrido = []

@@ -160,23 +160,6 @@
                 nodoPadre.agregarHijo(terreno)
                 
                 // Creo la carretera
-                /*
-                let modeloCarretera = new Carretera(escena.alturaMaxPuente)
-                var supCarretera = new SuperficieBarrido(
-                    modeloCarretera.getPerfil(0.1),
-                    modeloCarretera.getRecorrido(0.1)
-                )
-                var carretera = new Objeto3D()
-                carretera.setGeometria(
-                    supCarretera.getPositionBuffer(),
-                    supCarretera.getNormalBuffer(),
-                    supCarretera.getIndexBuffer()
-                )
-                carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
-                carretera.setPosicion(vec3.fromValues(0,1.01,0))
-                carretera.setEscala(vec3.fromValues(0.25,1,2))
-                nodoPadre.agregarHijo(carretera)
-                */
                 let carretera = new Carretera(escena.alturaMaxPuente)
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
@@ -184,28 +167,18 @@
                 nodoPadre.agregarHijo(carretera)
 
                 // Creo las 4 torres del puente 
-                let modeloTorre = new Torre(escena.alturaTorre)
-                var suptorre = new SuperficieBarrido(
-                    modeloTorre.getPerfil(0.1),
-                    modeloTorre.getRecorrido(0.1)
-                )
                 let torres = []
                 for(let i=0; i<4; i++){
-                    var torrei = new Objeto3D()
-                    torrei.setGeometria(
-                        suptorre.getPositionBuffer(),
-                        suptorre.getNormalBuffer(),
-                        suptorre.getIndexBuffer()
-                    )
-                    torrei.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-                    nodoPadre.agregarHijo(torrei)
-                    torres.push(torrei)
+                    let torre = new Torre(escena.alturaTorre)
+                    torre.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    nodoPadre.agregarHijo(torre)
+                    torres.push(torre)
                 }
                 torres[0].setPosicion(vec3.fromValues(escena.separacionTorres/2,-5,2.25))
                 torres[1].setPosicion(vec3.fromValues(escena.separacionTorres/2,-5,-2.25))
                 torres[2].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,2.25))
                 torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,-2.25))
-
+            
                 let comeinzoPuente = carretera.getRecorridoDisc(0.5)[1].getCoords()
                 let finPuente = carretera.getRecorridoDisc(0.5)[7].getCoords()
 
