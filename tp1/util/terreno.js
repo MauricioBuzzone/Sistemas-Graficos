@@ -9,17 +9,16 @@ var mat4=glMatrix.mat4;
 export class Terreno{
     
     constructor(perfilStep,recorridoStep){
-        this.amplitud = 5
+        this.amplitud = 4
         this.despOsilatorio = null
         this.puntosDeCotrol = [
-            vec3.fromValues(50,0,0),
-            vec3.fromValues(27,0,0),
-            vec3.fromValues(17,0,0),
-            vec3.fromValues(10,-3,0),
-            vec3.fromValues(5,-10,0),
-            vec3.fromValues(-5,-10,0),
-            vec3.fromValues(-11,0,0),
-            vec3.fromValues(-70,0,0),
+            vec3.fromValues(30,0,0),
+            vec3.fromValues(10,0,0),
+            vec3.fromValues(5,-4,0),
+            vec3.fromValues(1,-5,0),
+            vec3.fromValues(-5,-4,0),
+            vec3.fromValues(-10,0,0),
+            vec3.fromValues(-30,0,0),
         ]
         this.recorrido = null
         this.objeto3d = new Objeto3D()

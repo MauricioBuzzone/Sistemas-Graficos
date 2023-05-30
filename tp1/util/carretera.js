@@ -54,16 +54,16 @@ export class Carretera{
         this.recorrido = new CurvaGenerica([
             new Curva(Bases.Bezier2,[
                 vec3.fromValues(0,0,-20),  
-                vec3.fromValues(0,0,-12),
-                vec3.fromValues(0,0,-10)
+                vec3.fromValues(0,0,-15),
+                vec3.fromValues(0,0,-12)
             ]),
             new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0,-10), 
+                vec3.fromValues(0,0,-12), 
                 vec3.fromValues(0,altura,0), 
-                vec3.fromValues(0,0,10)
+                vec3.fromValues(0,0,12)
             ]),
             new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0,10), 
+                vec3.fromValues(0,0,12), 
                 vec3.fromValues(0,0,15), 
                 vec3.fromValues(0,0,20), 
             ])
@@ -73,6 +73,10 @@ export class Carretera{
     
     getPerfil(step){
         return this.perfil.getDiscretizacion(step)
+    }
+
+    getRecorridoDisc(step){
+        return this.recorrido.getDiscretizacion(step)
     }
 
     getRecorrido(step){

@@ -53,11 +53,11 @@ export class Cable{
 
     getPerfil(step){
         return this.perfil.getDiscretizacion(step)
-
-
     }
-
-
+    
+    setRecorrido(recorrido){
+        this.recorrido = recorrido
+    }
     getRecorrido(step){
         var puntos = this.recorrido.getDiscretizacion(step)
         var recorrido = []
