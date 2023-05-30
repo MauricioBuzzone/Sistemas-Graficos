@@ -160,6 +160,7 @@
                 nodoPadre.agregarHijo(terreno)
                 
                 // Creo la carretera
+                /*
                 let modeloCarretera = new Carretera(escena.alturaMaxPuente)
                 var supCarretera = new SuperficieBarrido(
                     modeloCarretera.getPerfil(0.1),
@@ -175,7 +176,12 @@
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
                 carretera.setEscala(vec3.fromValues(0.25,1,2))
                 nodoPadre.agregarHijo(carretera)
-
+                */
+                let carretera = new Carretera(escena.alturaMaxPuente)
+                carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+                carretera.setPosicion(vec3.fromValues(0,1.01,0))
+                carretera.setEscala(vec3.fromValues(0.25,1,2))
+                nodoPadre.agregarHijo(carretera)
 
                 // Creo las 4 torres del puente 
                 let modeloTorre = new Torre(escena.alturaTorre)
@@ -200,17 +206,17 @@
                 torres[2].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,2.25))
                 torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,-2.25))
 
-                let comeinzoPuente = modeloCarretera.getRecorridoDisc(0.5)[1].getCoords()
-                let finPuente = modeloCarretera.getRecorridoDisc(0.5)[7].getCoords()
+                let comeinzoPuente = carretera.getRecorridoDisc(0.5)[1].getCoords()
+                let finPuente = carretera.getRecorridoDisc(0.5)[7].getCoords()
 
 
                 let puntosDeControl = [
                     vec3.fromValues(0,comeinzoPuente[1],2*comeinzoPuente[2]),
-                    vec3.fromValues(0,(escena.alturaTorre-6)*2/3,2*comeinzoPuente[2]*1/3),
-                    vec3.fromValues(0,escena.alturaTorre-6,-escena.separacionTorres/2),
-                    vec3.fromValues(0,escena.alturaMaxPuente+1,0),
-                    vec3.fromValues(0,escena.alturaTorre-6,escena.separacionTorres/2),
-                    vec3.fromValues(0,(escena.alturaTorre-6)*2/3,2*finPuente[2]*1/3),
+                    vec3.fromValues(0,(escena.alturaTorre-5)*2/3,2*comeinzoPuente[2]*1/3),
+                    vec3.fromValues(0,escena.alturaTorre-5,-escena.separacionTorres/2),
+                    vec3.fromValues(0,escena.alturaTorre-10,0),
+                    vec3.fromValues(0,escena.alturaTorre-5,escena.separacionTorres/2),
+                    vec3.fromValues(0,(escena.alturaTorre-5)*2/3,2*finPuente[2]*1/3),
                     vec3.fromValues(0,finPuente[1],2*finPuente[2]),
                 ]
 

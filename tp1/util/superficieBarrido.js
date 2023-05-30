@@ -9,6 +9,16 @@ export class SuperficieBarrido {
         this.recorrido = recorrido
     }
 
+    getBuffers(poligono,recorrido) {
+      this.poligono = poligono 
+      this.recorrido = recorrido
+      let positionBuffer = this.getPositionBuffer()
+      let normalBuffer = this.getNormalBuffer()
+      let indexBuffer = this.getIndexBuffer()
+
+      return [positionBuffer,normalBuffer,indexBuffer]
+    }
+
     getPositionBuffer() {
         let positionBuffer = [];
     

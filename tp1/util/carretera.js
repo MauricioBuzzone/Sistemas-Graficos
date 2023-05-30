@@ -1,76 +1,38 @@
 import {Curva, Bases} from './curva.js'
 import {CurvaGenerica} from './curvaGenerica.js'
+import {Objeto3D} from '../objeto3D.js'
+import {SuperficieBarrido} from './superficieBarrido.js'
+
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
-export class Carretera{
+export class Carretera extends Objeto3D{ 
     constructor(altura){
+        super()
+        this.perfil = null
+        this.recorrido = null
+        this.stepPerfil = 0.1
+        this.stepRecorrido = 0.1
+        this.supBarrido = new SuperficieBarrido()
 
-        this.perfil = new CurvaGenerica([
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(-10,-1,0),
-                vec3.fromValues(0,-1,0),
-                vec3.fromValues(10,-1,0),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(10,-1,0),
-                vec3.fromValues(10,0,0),
-                vec3.fromValues(10,0,0)
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(10,0,0),
-                vec3.fromValues(9,0,0),
-                vec3.fromValues(8,0,0)
-            ]),
-            new Curva(Bases.Bezier3,[
-                vec3.fromValues(8,0,0),
-                vec3.fromValues(7.8,0,0),
-                vec3.fromValues(7.8,-0.2,0),
-                vec3.fromValues(7.6,-0.2,0)
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(7.6,-0.2,0),
-                vec3.fromValues(-7.6,-0.2,0),
-                vec3.fromValues(-7.6,-0.2,0)
-            ]),
-            new Curva(Bases.Bezier3,[
-                vec3.fromValues(-7.6,-0.2,0),
-                vec3.fromValues(-7.8,-0.2,0),
-                vec3.fromValues(-7.8,0,0),
-                vec3.fromValues(-8,0,0),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(-8,0,0),  
-                vec3.fromValues(-9,0,0),
-                vec3.fromValues(-10,0,0),
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(-10,0,0), 
-                vec3.fromValues(-10,0,0), 
-                vec3.fromValues(-10,-1,0), 
-            ])
-        ])
-
-        this.recorrido = new CurvaGenerica([
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0,-20),  
-                vec3.fromValues(0,0,-15),
-                vec3.fromValues(0,0,-12)
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0,-12), 
-                vec3.fromValues(0,altura,0), 
-                vec3.fromValues(0,0,12)
-            ]),
-            new Curva(Bases.Bezier2,[
-                vec3.fromValues(0,0,12), 
-                vec3.fromValues(0,0,15), 
-                vec3.fromValues(0,0,20), 
-            ])
-        ])
-        this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
+        this.setPerfil()
+        this.setRecorrido(altura)
     }
     
+    dibujar(matPadre, gl, viewMatrix, projMatrix) {
+        let buffers = this.supBarrido.getBuffers(
+            this.getPerfil(this.stepPerfil),
+            this.getRecorrido(this.stepRecorrido)
+        )
+
+        this.setGeometria(
+            buffers[0], // positionBuffer
+            buffers[1], // normalBuffer
+            buffers[2], // indexBuffer
+        )
+        super.dibujar(matPadre, gl, viewMatrix, projMatrix)
+    }
+
     getPerfil(step){
         return this.perfil.getDiscretizacion(step)
     }
@@ -101,5 +63,101 @@ export class Carretera{
         return recorrido
     }
 
+    setRecorrido(altura){
+        let puntosDeControl = [
+            vec3.fromValues(0,0,-20),  
+            vec3.fromValues(0,0,-15),
+            vec3.fromValues(0,0,-12), 
+            vec3.fromValues(0,altura,0), 
+            vec3.fromValues(0,0,12), 
+            vec3.fromValues(0,0,15), 
+            vec3.fromValues(0,0,20), 
+        ]
 
+        this.recorrido = new CurvaGenerica([
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[0],
+                puntosDeControl[1],
+                puntosDeControl[2]
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[2],
+                puntosDeControl[3],
+                puntosDeControl[4],
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[4],
+                puntosDeControl[5],
+                puntosDeControl[6],
+            ])
+        ])
+        this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
+    }
+    setPerfil(){
+        let puntosDeControl = [
+            vec3.fromValues(-10,-1,0),
+            vec3.fromValues(0,-1,0),
+            vec3.fromValues(10,-1,0),
+            vec3.fromValues(10,0,0),
+            vec3.fromValues(10,0,0),
+            vec3.fromValues(9,0,0),
+            vec3.fromValues(8,0,0),
+            vec3.fromValues(7.8,0,0),
+            vec3.fromValues(7.8,-0.2,0),
+            vec3.fromValues(7.6,-0.2,0),
+            vec3.fromValues(-7.6,-0.2,0),
+            vec3.fromValues(-7.6,-0.2,0),
+            vec3.fromValues(-7.8,-0.2,0),
+            vec3.fromValues(-7.8,0,0),
+            vec3.fromValues(-8,0,0),
+            vec3.fromValues(-9,0,0),
+            vec3.fromValues(-10,0,0),
+            vec3.fromValues(-10,0,0), 
+            vec3.fromValues(-10,-1,0), 
+        ]
+        this.perfil = new CurvaGenerica([
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[0],
+                puntosDeControl[1],
+                puntosDeControl[2],
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[2],
+                puntosDeControl[3],
+                puntosDeControl[4]
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[4],
+                puntosDeControl[5],
+                puntosDeControl[6],
+            ]),
+            new Curva(Bases.Bezier3,[
+                puntosDeControl[6],
+                puntosDeControl[7],
+                puntosDeControl[8],
+                puntosDeControl[9], 
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[9],
+                puntosDeControl[10],
+                puntosDeControl[11],
+            ]),
+            new Curva(Bases.Bezier3,[
+                puntosDeControl[11],
+                puntosDeControl[12],
+                puntosDeControl[13],
+                puntosDeControl[14], 
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[14], 
+                puntosDeControl[15], 
+                puntosDeControl[16], 
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[16], 
+                puntosDeControl[17], 
+                puntosDeControl[18], 
+            ])
+        ])
+    }
 }
