@@ -30,12 +30,14 @@ export class CopaArbol extends Objeto3D{
                 this.getPerfil(this.stepPerfil),
                 this.getRecorrido(this.stepRecorrido)
             )
+
+            this.setGeometria(
+                this.buffers[0], // positionBuffer
+                this.buffers[1], // normalBuffer
+                this.buffers[2], // indexBuffer
+            )
         }
-        this.setGeometria(
-            this.buffers[0], // positionBuffer
-            this.buffers[1], // normalBuffer
-            this.buffers[2], // indexBuffer
-        )
+
         super.dibujar(matPadre, gl, viewMatrix, projMatrix)
     }
 

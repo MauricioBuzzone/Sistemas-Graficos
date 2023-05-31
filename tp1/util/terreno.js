@@ -14,9 +14,9 @@ export class Terreno{
         this.puntosDeCotrol = [
             vec3.fromValues(30,0,0),
             vec3.fromValues(10,0,0),
-            vec3.fromValues(5,-4,0),
-            vec3.fromValues(1,-5,0),
-            vec3.fromValues(-5,-4,0),
+            vec3.fromValues(5,-6,0),
+            vec3.fromValues(1,-7,0),
+            vec3.fromValues(-5,-6,0),
             vec3.fromValues(-10,0,0),
             vec3.fromValues(-30,0,0),
         ]

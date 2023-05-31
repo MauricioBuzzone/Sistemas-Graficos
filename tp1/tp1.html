@@ -85,9 +85,10 @@
             import {Punto} from './util/punto.js'
             import {Camara, Estrategia} from './util/camara.js'
             import {Arbol} from './util/arbol.js'
-            import { VarienteArbol } from "./util/copaArbol.js";
-
-
+            import {VarienteArbol} from "./util/copaArbol.js";
+            import {Cubo} from './util/cubo.js'
+            import {Plano} from './util/plano.js'
+            import {Barco} from './util/barco.js'
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 
@@ -108,15 +109,14 @@
 
             var nodoPadre = null
             var hijo1 = null
-            var hijo2 = null
-            var torre1 = null
+            var barco = null
 
             var generator = new Math.seedrandom('Sistemas Gráficos –Trabajo Práctico Nº1 – 1er. Cuat. 2023');
 
             var escena={
                 alturaMaxPuente:5,
                 alturaTorre:15,
-                alturaRio:-2,
+                alturaRio:-5,
                 separacionTorres:16,
                 s1:5,
                 generar:function(){
@@ -189,12 +189,12 @@
                     nodoPadre.agregarHijo(torre)
                     torres.push(torre)
                 }
-                torres[0].setPosicion(vec3.fromValues(escena.separacionTorres/2,-5,2.25))
-                torres[1].setPosicion(vec3.fromValues(escena.separacionTorres/2,-5,-2.25))
-                torres[2].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,2.25))
-                torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,-2.25))
+                torres[0].setPosicion(vec3.fromValues(escena.separacionTorres/2,-7,2.25))
+                torres[1].setPosicion(vec3.fromValues(escena.separacionTorres/2,-7,-2.25))
+                torres[2].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-7,2.25))
+                torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-7,-2.25))
             
-
+                // Creo todos arboles 
                 for(let i=0; i < randomToRange(10,15);i++){
                     
                     let arbol = new Arbol()
@@ -207,13 +207,33 @@
                     while( z < 5 &&  z > -5 )  z = randomToRange(-35,35)
                     if(i % 2 != 0){
                         x = randomToRange(-25,-45)
+                        
                     }
-                    
                     arbol.setPosicion(vec3.fromValues(x,0,z))
+                    
+                    let escala = randomToRange(1,5)/10 +1
+                    arbol.setEscala(vec3.fromValues(escala,1,escala))
                     nodoPadre.agregarHijo(arbol)
                 }
+                
+
+                // Rio y barco
+                let nodoRioBarco = new Objeto3D()
+                nodoPadre.agregarHijo(nodoRioBarco)
+                nodoRioBarco.setPosicion(vec3.fromValues(0,escena.alturaRio,0))
+
+                
+                let plano = new Plano()
+                nodoRioBarco.agregarHijo(plano)
+                plano.setEscala(vec3.fromValues(1,40,40))
+                plano.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+
+                barco = new Barco()
+                nodoRioBarco.agregarHijo(barco)
+                
 
 
+                /*
                 let comeinzoPuente = carretera.getRecorridoDisc(0.5)[1].getCoords()
                 let finPuente = carretera.getRecorridoDisc(0.5)[7].getCoords()
                 let puntosDeControl = [
@@ -255,7 +275,7 @@
                 cable2.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 cable2.setPosicion(vec3.fromValues(0,-0.5,-2.25))
                 nodoPadre.agregarHijo(cable2)
-                
+                */
 
                 // Esfera que simula la fuente de luz
                 var esfera = new Objeto3D()
@@ -289,7 +309,11 @@
                     
                 });
                 f1.add(escena, 's1', -10.0, 30.0).name("separacion tensores").step(1);
-                f1.add(escena, 'alturaRio', -10.0, 30.0).name("altura rio").step(1);
+                f1.add(escena, 'alturaRio', -6.0, -1.0).name("altura rio")
+                    .step(0.5)
+                    .onChange(function(altRio){
+                        escena.alturaRio = altRio     
+                });
                 f1.add(escena, 'generar').name("generar");
                 f1.open(); 
 
@@ -323,30 +347,21 @@
             }
 
  
-            var offset = 0
-
- 
+            var offset = 0.1
             $("body").mousemove(function(event){camara.handler(event)});
             $('body').mousedown(function(event){camara.handler(event)});
             $('body').mouseup(function(event){camara.handler(event)});
             $('body').on('mousewheel',function(event){camara.handler(event)});
             $('body').on("keydown",function(event){camara.handler(event)})
- 
+            var posBarco = 35
             function animate(){
-                offset += 0.1
-
-                //hijo1.setRotacion([offset*0.1,vec3.fromValues(0,1,0)])
+                if(posBarco <= -35){
+                    posBarco = 35
+                }
+                barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
+    
                 mat4.identity(viewMatrix)
-               
-                /*
-                var x = radio * Math.sin(beta)* Math.cos(alpha)
-                var z = radio * Math.sin(beta)* Math.sin(alpha)
-                var y = radio * Math.cos(beta)
-                mat4.lookAt(viewMatrix, [x,y,z], [0,0,0], [0,1,0])
-                */
-
                 let view = camara.getViewParameters()
-                
                 mat4.lookAt(viewMatrix, view.eye, view.center, view.up)
 
             }
