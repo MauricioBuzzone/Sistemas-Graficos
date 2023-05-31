@@ -1,20 +1,15 @@
-import {Curva, Bases} from './curva.js'
-import { CurvaGenerica } from './curvaGenerica.js';
-import { Objeto3D } from '../objeto3D.js';
-import {SuperficieBarrido} from './superficieBarrido.js'
-import {Plano} from './plano.js'
+import {Curva, Bases} from '../util/curva.js'
+import { CurvaGenerica } from '../util/curvaGenerica.js';
+import { Modelo } from './modelo.js';
+
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
-export class CascoBarco extends Objeto3D{
+export class CascoBarco extends Modelo{
     constructor(){
         super()
-        this.perfil = null
-        this.recorrido = null
         this.stepPerfil = 0.1
         this.stepRecorrido = 1
-        this.buffers = null
-        this.supBarrido = new SuperficieBarrido()
 
         this.setPerfil()
         this.setRecorrido()
@@ -88,10 +83,6 @@ export class CascoBarco extends Objeto3D{
             )
         }
         super.dibujar(matPadre, gl, viewMatrix, projMatrix)
-    }
-
-    getPerfil(step){
-        return this.perfil.getDiscretizacion(step)
     }
 
     getRecorrido(step){

@@ -1,5 +1,7 @@
+import { Objeto3D } from './objeto3D.js';
+
 var vec3=glMatrix.vec3;
-import { Objeto3D } from '../objeto3D.js';
+
 export const Estrategia = {
 	Orbital: Symbol('Orbital'),
 	Drone: Symbol('Drone'),

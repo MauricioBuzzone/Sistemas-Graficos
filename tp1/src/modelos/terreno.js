@@ -1,8 +1,8 @@
-import { Objeto3D } from '../objeto3D.js';
-import {Curva, Bases} from './curva.js'
-import {CurvaGenerica} from './curvaGenerica.js'
-import { Punto } from './punto.js';
-import { SuperficieBarrido } from './superficieBarrido.js';
+import { Objeto3D } from '../util/objeto3D.js';
+import {Curva, Bases} from '../util/curva.js'
+import {CurvaGenerica} from '../util/curvaGenerica.js'
+import { SuperficieBarrido } from '../util/superficieBarrido.js';
+
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 

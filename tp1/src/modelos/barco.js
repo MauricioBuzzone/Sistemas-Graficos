@@ -1,8 +1,7 @@
-import {Curva, Bases} from './curva.js'
-import {CurvaGenerica} from './curvaGenerica.js'
+import { Objeto3D } from '../util/objeto3D.js';
 import { CascoBarco } from './cascoBarco.js';
-import { Objeto3D } from '../objeto3D.js';
 import { Cubo } from './cubo.js';
+
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 

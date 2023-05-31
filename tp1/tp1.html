@@ -29,9 +29,8 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
         <script type="text/javascript" src="js/gl-matrix.js"></script>
-        <script src="dat.gui.min.js"></script>
-        <script src="modulo-geometria.js"></script>
-        <script type="module" src="objeto3D.js"></script>
+        <script src="js/dat.gui.min.js"></script>
+        <script src="src/util/modulo-geometria.js"></script>
         <script id="shader-vs" type="x-shader/x-vertex">
 
             precision highp float;
@@ -74,21 +73,21 @@
         
         <script type="module" >
 
-            import {Objeto3D}  from './objeto3D.js';
-            import {SuperficieBarrido} from './util/superficieBarrido.js'
-            import {Curva, Bases} from './util/curva.js'
-            import {CurvaGenerica} from './util/curvaGenerica.js'
-            import {Carretera} from './util/carretera.js'
-            import {Cilindro} from './util/cilindro.js'
-            import {Terreno} from './util/terreno.js'
-            import {Torre} from './util/torre.js'
-            import {Punto} from './util/punto.js'
-            import {Camara, Estrategia} from './util/camara.js'
-            import {Arbol} from './util/arbol.js'
-            import {VarienteArbol} from "./util/copaArbol.js";
-            import {Cubo} from './util/cubo.js'
-            import {Plano} from './util/plano.js'
-            import {Barco} from './util/barco.js'
+            import {Objeto3D}  from './src/util/objeto3D.js';
+            import {Curva, Bases} from './src/util/curva.js'
+            import {CurvaGenerica} from './src/util/curvaGenerica.js'
+            import {Camara, Estrategia} from './src/util/camara.js'
+            import {Punto} from './src/util/punto.js'
+
+            import {Carretera} from './src/modelos/carretera.js'
+            import {Torre} from './src/modelos/torre.js'
+            import {Terreno} from './src/modelos/terreno.js'
+            import {Barco} from './src/modelos/barco.js'
+            import {Plano} from './src/modelos/plano.js'
+            import {Cilindro} from './src/modelos/cilindro.js'
+            import {Arbol, VarienteArbol} from './src/modelos/arbol.js'
+    
+            
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 

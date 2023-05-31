@@ -1,8 +1,13 @@
-import { Objeto3D } from "../objeto3D.js";
+import { Objeto3D } from "../util/objeto3D.js";
 import { Cilindro } from "./cilindro.js";
-import { CopaArbol, VarienteArbol } from "./copaArbol.js";
+import { CopaArbol } from "./copaArbol.js";
 
 var vec3=glMatrix.vec3;
+
+export const VarienteArbol = {
+    Pino: Symbol('Pino'),
+    Default: Symbol('Default')
+}
 
 export class Arbol extends Objeto3D{
     constructor(variante = VarienteArbol.Default){
