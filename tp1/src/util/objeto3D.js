@@ -237,6 +237,11 @@ export class Objeto3D {
         return this.posición
     }
 
+    getMatrizModelado(){
+        this.actualizarMatrizModelado()
+        return this.matrizModelado
+    }
+
     setEscala(escala) {
         this.escala = escala
     }

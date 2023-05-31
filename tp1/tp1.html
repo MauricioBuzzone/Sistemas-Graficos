@@ -102,11 +102,15 @@
             var modelMatrix = mat4.create();
             var viewMatrix = mat4.create();
             var projMatrix = mat4.create();
-            
+             
+            var offset = 0.1
+            var posBarco = 35
+
             var vertexShaderFile="vertex-shader.glsl";
             var camara = new Camara()
 
             var nodoPadre = null
+            var nodoRioBarco = null
             var hijo1 = null
             var barco = null
 
@@ -128,13 +132,19 @@
                     setEstrategiaCamara(Estrategia.Drone)
                 }, 
                 barco:function(){
-                    console.log("WIP: camara barco")
+                    setEstrategiaCamara(Estrategia.Barco)
+                    setInfoBarco(barco,nodoRioBarco)
                 }, 
             };
 
             function setEstrategiaCamara(estrategia){
                 camara.setEstrategia(estrategia)
             }
+
+            function setInfoBarco(barco,padreBarco){
+                camara.setBarcoInfo(barco,padreBarco)
+            }
+
             function initWebGL(){
 
                 canvas = document.getElementById("my-canvas");  
@@ -151,7 +161,6 @@
                     setupWebGL();
                     GUI();
                     crearEscena();
-                    
                     tick();   
 
                 }else{    
@@ -217,7 +226,7 @@
                 
 
                 // Rio y barco
-                let nodoRioBarco = new Objeto3D()
+                nodoRioBarco = new Objeto3D()
                 nodoPadre.agregarHijo(nodoRioBarco)
                 nodoRioBarco.setPosicion(vec3.fromValues(0,escena.alturaRio,0))
 
@@ -228,8 +237,10 @@
                 plano.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
 
                 barco = new Barco()
+                barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
                 nodoRioBarco.agregarHijo(barco)
-                
+
+                setInfoBarco(barco,nodoRioBarco)
 
 
                 /*
@@ -345,14 +356,13 @@
                 nodoPadre.dibujar(modelMatrix,gl,viewMatrix,projMatrix)
             }
 
- 
-            var offset = 0.1
+
             $("body").mousemove(function(event){camara.handler(event)});
             $('body').mousedown(function(event){camara.handler(event)});
             $('body').mouseup(function(event){camara.handler(event)});
             $('body').on('mousewheel',function(event){camara.handler(event)});
             $('body').on("keydown",function(event){camara.handler(event)})
-            var posBarco = 35
+            
             function animate(){
                 if(posBarco <= -35){
                     posBarco = 35

@@ -11,18 +11,26 @@ const orbitalId  = '1'
 const droneId  = '2'
 const barcoId  = '3'
 
-export class Camara{
+export class Camara {
     constructor(){
-        this.estrategia = new Orbital()
+
+        this.estrategias = [
+            new Orbital(),
+            new Drone(),
+            new CamaraBarco(),
+        ]
+        this.camaraActual = this.estrategias[0]
     }
 
     setEstrategia(estrategia){
         if(estrategia == Estrategia.Orbital){
-            this.estrategia = new Orbital()
+            this.camaraActual =  this.estrategias[0]
         }
-        if(estrategia == Estrategia.Drone){
-            this.estrategia = new Drone()
-        }    
+        else if(estrategia == Estrategia.Drone){
+            this.camaraActual = this.estrategias[1]
+        }else{
+            this.camaraActual = this.estrategias[2]
+        }
     }
 
     handler(event){
@@ -34,14 +42,46 @@ export class Camara{
                 this.setEstrategia(Estrategia.Drone)
             break 
             case barcoId:
-                console.log("WIP: Camara barco")
+                this.setEstrategia(Estrategia.Barco)
             break
         }
-        this.estrategia.handler(event)
+        this.camaraActual.handler(event)
     }
 
     getViewParameters(){
-        return this.estrategia.getViewParameters()
+        return this.camaraActual.getViewParameters()
+    }
+
+    setBarcoInfo(barco,padreBarco){
+        this.estrategias[2].setInfo(barco,padreBarco)
+    }
+}
+
+class CamaraBarco {
+    constructor(){
+        this.barco = null
+        this.padreBarco = null
+        this.posCamara = vec3.fromValues(0,5,20)
+    }
+    setInfo(barco,padreBarco){
+
+        this.barco = barco
+        this.padreBarco = padreBarco
+    }
+    handler(event){
+        
+    }
+
+    getViewParameters(){
+        let wordposBarco = this.padreBarco.localToWorld(this.barco.getPosicion())
+        let wordposCamara = this.barco.localToWorld( this.posCamara)
+        var viewParameters = {
+            eye: wordposCamara,
+            center: wordposBarco,
+            up: [0,1,0]
+        }      
+
+        return viewParameters
     }
 }
 
