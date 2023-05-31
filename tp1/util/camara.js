@@ -5,6 +5,9 @@ export const Estrategia = {
 	Drone: Symbol('Drone'),
 	Drone: Symbol('Barco'),
 }
+const orbitalId  = '1'
+const droneId  = '2'
+const barcoId  = '3'
 
 export class Camara{
     constructor(){
@@ -21,6 +24,17 @@ export class Camara{
     }
 
     handler(event){
+        switch(event.key){
+            case orbitalId:
+               this.setEstrategia(Estrategia.Orbital)
+            break
+            case droneId:
+                this.setEstrategia(Estrategia.Drone)
+            break 
+            case barcoId:
+                console.log("WIP: Camara barco")
+            break
+        }
         this.estrategia.handler(event)
     }
 
@@ -66,8 +80,15 @@ class Drone {
             break
             
             case 'mousemove':
-                this.mouse.x = event.clientX || event.pageX; 
-                this.mouse.y = event.clientY || event.pageY 
+                if (this.isMouseDown){
+                    this.mouse.x = event.clientX || event.pageX;
+                    this.mouse.y = event.clientY || event.pageY;
+                } else {
+                    this.mouse.x = event.clientX || event.pageX;
+                    this.mouse.y = event.clientY || event.pageY;    
+                    this.previousClientX =  this.mouse.x;
+                    this.previousClientY =  this.mouse.y;
+                }
             break 
 
             case 'mousedown':
@@ -210,15 +231,22 @@ class Orbital {
             break
             case 'mousewheel':
                 if (event.originalEvent.deltaY > 0){
-                    this.radio +=this.factorVelocidad*80
+                    this.radio +=this.factorVelocidad*150
                 }else{
-                    this.radio -=this.factorVelocidad*80
+                    this.radio -=this.factorVelocidad*150
                 }
     
             break 
             case 'mousemove':
-                this.mouse.x = event.clientX || event.pageX; 
-                this.mouse.y = event.clientY || event.pageY 
+                if (this.isMouseDown){
+                    this.mouse.x = event.clientX || event.pageX;
+                    this.mouse.y = event.clientY || event.pageY;
+                } else {
+                    this.mouse.x = event.clientX || event.pageX;
+                    this.mouse.y = event.clientY || event.pageY;    
+                    this.previousClientX =  this.mouse.x;
+                    this.previousClientY =  this.mouse.y;
+                }
             break 
 
             case 'mousedown':

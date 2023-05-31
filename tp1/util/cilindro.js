@@ -5,7 +5,7 @@ import { Objeto3D } from '../objeto3D.js';
 import {SuperficieBarrido} from './superficieBarrido.js'
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
-export class Cable extends Objeto3D{
+export class Cilindro extends Objeto3D{
 
     constructor(){
         super()
@@ -42,9 +42,9 @@ export class Cable extends Objeto3D{
 
     setRecorridoDef(){
         let puntosDeControl = [
-            vec3.fromValues(0,0,-5),
             vec3.fromValues(0,0,0),
-            vec3.fromValues(0,0,5),
+            vec3.fromValues(0,0,0),
+            vec3.fromValues(0,0,1),
         ]
 
         this.recorrido = new CurvaGenerica([

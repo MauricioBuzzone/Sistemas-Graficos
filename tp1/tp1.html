@@ -27,6 +27,7 @@
     		</canvas>    		
     	</center>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
         <script type="text/javascript" src="js/gl-matrix.js"></script>
         <script src="dat.gui.min.js"></script>
         <script src="modulo-geometria.js"></script>
@@ -78,11 +79,15 @@
             import {Curva, Bases} from './util/curva.js'
             import {CurvaGenerica} from './util/curvaGenerica.js'
             import {Carretera} from './util/carretera.js'
-            import {Cable} from './util/cable.js'
+            import {Cilindro} from './util/cilindro.js'
             import {Terreno} from './util/terreno.js'
             import {Torre} from './util/torre.js'
             import {Punto} from './util/punto.js'
             import {Camara, Estrategia} from './util/camara.js'
+            import {Arbol} from './util/arbol.js'
+            import { VarienteArbol } from "./util/copaArbol.js";
+
+
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 
@@ -106,6 +111,8 @@
             var hijo2 = null
             var torre1 = null
 
+            var generator = new Math.seedrandom('Sistemas Gráficos –Trabajo Práctico Nº1 – 1er. Cuat. 2023');
+
             var escena={
                 alturaMaxPuente:5,
                 alturaTorre:15,
@@ -120,6 +127,9 @@
                 }, 
                 drone:function(){
                     setEstrategiaCamara(Estrategia.Drone)
+                }, 
+                barco:function(){
+                    console.log("WIP: camara barco")
                 }, 
             };
 
@@ -153,12 +163,14 @@
            
 
             function crearEscena(){
+                generator = new Math.seedrandom('Sistemas Gráficos');
+
                 nodoPadre = new Objeto3D();
                 nodoPadre.setPosicion(vec3.fromValues(0,0,0))
                 
                 // Creo el terreno
                 let terreno = new Terreno(0.1,0.01)
-                terreno.setEscala(vec3.fromValues(2,1,1))
+                terreno.setEscala(vec3.fromValues(2.5,1,1))
                 terreno.setPosicion(vec3.fromValues(0,0,0))
                 nodoPadre.agregarHijo(terreno)
                 
@@ -166,7 +178,7 @@
                 let carretera = new Carretera(escena.alturaMaxPuente)
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
-                carretera.setEscala(vec3.fromValues(0.25,1,2))
+                carretera.setEscala(vec3.fromValues(0.25,1,2.5))
                 nodoPadre.agregarHijo(carretera)
 
                 // Creo las 4 torres del puente 
@@ -183,6 +195,23 @@
                 torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-5,-2.25))
             
 
+                for(let i=0; i < randomToRange(10,15);i++){
+                    
+                    let arbol = new Arbol()
+                    if(randomToRange(0,2) < 0.5){
+                        arbol = new Arbol(VarienteArbol.Pino)
+                    }
+                    
+                    let x = randomToRange(30,45)
+                    let z = randomToRange(-35,35)
+                    while( z < 5 &&  z > -5 )  z = randomToRange(-35,35)
+                    if(i % 2 != 0){
+                        x = randomToRange(-25,-45)
+                    }
+                    
+                    arbol.setPosicion(vec3.fromValues(x,0,z))
+                    nodoPadre.agregarHijo(arbol)
+                }
 
 
                 let comeinzoPuente = carretera.getRecorridoDisc(0.5)[1].getCoords()
@@ -215,13 +244,13 @@
                 ])
 
                 // Creo los cables del puente     
-                let cable = new Cable()
+                let cable = new Cilindro()
                 cable.setRecorrido(recorridoCable)
                 cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 cable.setPosicion(vec3.fromValues(0,-0.5,2.25))
                 nodoPadre.agregarHijo(cable)
 
-                let cable2 = new Cable()
+                let cable2 = new Cilindro()
                 cable2.setRecorrido(recorridoCable)
                 cable2.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 cable2.setPosicion(vec3.fromValues(0,-0.5,-2.25))
@@ -237,7 +266,9 @@
                 nodoPadre.agregarHijo(esfera)
             }
 
-
+            function randomToRange(min, max){
+                return Math.floor(generator() * (max - min)) + min;
+            }
             function GUI (){
                 var gui = new dat.GUI();		
                 var f1 = gui.addFolder('Menú');		
@@ -265,7 +296,7 @@
                 var f2 = gui.addFolder('Camaras');	
                 f2.add(escena, 'orbital').name("Orbital");
                 f2.add(escena, 'drone').name("Drone");	
-                f2.open(); 
+                f2.add(escena, 'barco').name("Barco");	
             };
 
 
