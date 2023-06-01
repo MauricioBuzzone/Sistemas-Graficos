@@ -12,7 +12,7 @@ export class Torre extends Modelo{
         super()
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
-
+        this.setColor(240/255,60/255,60/255)
         this.setPerfil(altura)
         this.setRecorrido()
     }

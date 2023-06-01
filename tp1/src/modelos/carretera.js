@@ -10,7 +10,7 @@ export class Carretera extends Modelo{
         super()
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
-
+        this.setColor(183/255,187/255,186/255)
         this.setPerfil()
         this.setRecorrido(altura)
     }

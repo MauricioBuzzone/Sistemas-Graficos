@@ -17,6 +17,7 @@ export class Arbol extends Objeto3D{
         this.tronco.setRotacion([-Math.PI/2,vec3.fromValues(1,0,0)])
         this.tronco.setEscala(vec3.fromValues(2,2,2))
         this.tronco.setPosicion(vec3.fromValues(0,0,0))
+        this.tronco.setColor(58/255, 56/255, 40/255)
 
         this.copa = new CopaArbol(variante)
         this.copa.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])

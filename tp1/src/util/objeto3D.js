@@ -7,7 +7,7 @@ export class Objeto3D {
         this.positionBuffer = null;
         this.normalBuffer = null;
         this.indexBuffer = null;
-
+        this.color = [0.5,0.5,0.5]
         this.hijos = [];
         
 
@@ -73,6 +73,9 @@ export class Objeto3D {
             gl.uniformMatrix4fv(modelMatrixUniform, false,m);
             gl.uniformMatrix4fv(normalMatrixUniform, false, normalMatrix);
 
+            const vcolor  = gl.getUniformLocation(shaderProgram, "vColor");
+            gl.uniform3f(vcolor, this.color[0],this.color[1],this.color[2]);
+
             gl.drawElements( gl.TRIANGLE_STRIP, trianglesIndexBuffer.number_vertex_point, gl.UNSIGNED_SHORT, 0);    
             
             if(normal){
@@ -112,12 +115,6 @@ export class Objeto3D {
                 vertices.push(pointNormal[2])
             }
 
-            var vertex_buffer = gl.createBuffer( );
-            gl.bindBuffer( gl.ARRAY_BUFFER, vertex_buffer );
-            gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertices ), gl.STATIC_DRAW );
-            gl.bindBuffer( gl.ARRAY_BUFFER, null );
-
-
             const trianglesVerticeBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);    
@@ -128,50 +125,13 @@ export class Objeto3D {
             gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
             gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-            /*
-            var vertCode = 
-                'attribute vec3 coordinates;' +
-
-                'void main(void)' +
-
-                '{' +
-
-                    ' gl_Position = vec4(coordinates, 1.0);' +
-
-                '}';
-
-            var vertShader = gl.createShader( gl.VERTEX_SHADER );
-            gl.shaderSource( vertShader, vertCode );
-
-            gl.compileShader( vertShader );
-
-            var fragCode = 
-                'void main(void)' +
-                '{' +
-                    ' gl_FragColor = vec4(0.0, 0.0, 0.0, 0.1);' +
-                '}';
-
-            var fragShader = gl.createShader( gl.FRAGMENT_SHADER );
-            gl.shaderSource( fragShader, fragCode );
-            gl.compileShader( fragShader );
-
-            var shaderProgram = gl.createProgram( );
-            gl.attachShader( shaderProgram, vertShader );
-            gl.attachShader( shaderProgram, fragShader );
-            gl.linkProgram( shaderProgram );
-            
-            gl.bindBuffer( gl.ARRAY_BUFFER, vertex_buffer );
-
-            var coord = gl.getAttribLocation( shaderProgram, "coordinates" );
-
-            gl.vertexAttribPointer( coord, 3, gl.FLOAT, false, 0, 0 );
-
-            gl.enableVertexAttribArray( coord );
-            */
             gl.drawArrays( gl.LINES, 0, vertices.length/3 );
         }
     }
-  
+    
+    setColor(r,g,b){
+        this.color = [r,g,b]
+    }
     setGeometria(posBuffer, nrmBuffer, indexBuffer) {
         // Método público para establecer los buffers de posición, normal e índice
         this.positionBuffer = posBuffer;

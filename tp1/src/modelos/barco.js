@@ -8,23 +8,35 @@ var mat4=glMatrix.mat4;
 const CANT_CONTAINER = 8
 const CANT_FILAS = 5
 const CANT_COL = 2
+
+const colores = [
+    [240/255,60/255,60/255],
+    [60/255,60/255,240/255],
+    [240/255,240/255,60/255],
+    [240/255,60/255,240/255],
+]
 export class Barco extends Objeto3D{
     constructor(){
         super()
 
         this.cascoBarco = new CascoBarco()
         this.agregarHijo(this.cascoBarco)
+        this.cascoBarco.setColor(colores[0][0],colores[0][1],colores[0][2])
+
 
         this.cabina = new Cubo()
         this.agregarHijo(this.cabina)
         this.cabina.setPosicion(vec3.fromValues(0,3,4))
         this.cabina.setEscala(vec3.fromValues(2.5,1,1))
+        this.cabina.setColor(colores[0][0],colores[0][1],colores[0][2])
+
 
         this.techoCabina = new Cubo()
         this.agregarHijo(this.techoCabina)
         this.techoCabina.setPosicion(vec3.fromValues(0,4,4))
         this.techoCabina.setEscala(vec3.fromValues(3,0.5,1.5))
-
+        this.techoCabina.setColor(colores[0][0],colores[0][1],colores[0][2])
+            
         let cantContainer = 0
         let posPrimerFila = Math.floor(CANT_FILAS/2)
         let postUlt = CANT_FILAS - posPrimerFila
@@ -35,6 +47,11 @@ export class Barco extends Objeto3D{
                     this.agregarHijo(container)
                     container.setEscala(vec3.fromValues(0.5,0.5,1))  
                     container.setPosicion(vec3.fromValues(j*1.1,2.5+i*1.1,0))
+                    
+                    let coloresSize = colores.length
+                    let colorElegido = (i+Math.abs(j))% coloresSize
+                    
+                    container.setColor(colores[colorElegido][0],colores[colorElegido][1],colores[colorElegido][2])
                     cantContainer+=1
                 }
             }

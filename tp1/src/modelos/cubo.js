@@ -21,7 +21,11 @@ export class Cubo extends Modelo{
         this.setPerfil()
         this.setRecorrido()
     }
-
+    setColor(r,g,b){
+        this.tapaDelantera.setColor(r,g,b)
+        this.tapaTrasera.setColor(r,g,b)
+        super.setColor(r,g,b)
+    }
     setPerfil(){
         let puntosDeControl = [
             vec3.fromValues(1,-1,0),

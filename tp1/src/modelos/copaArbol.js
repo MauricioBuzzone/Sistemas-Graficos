@@ -11,7 +11,8 @@ export class CopaArbol extends Modelo{
         super()
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
-
+        let color = variente == VarienteArbol.Default ? [75/255,145/255,85/255]:[31/255,70/255,38/255]
+        this.setColor(color[0],color[1],color[2])
         this.setPerfil(variente)
         this.setRecorrido()
     }

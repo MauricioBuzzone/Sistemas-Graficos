@@ -10,7 +10,7 @@ export class CascoBarco extends Modelo{
         super()
         this.stepPerfil = 0.1
         this.stepRecorrido = 1
-
+        
         this.setPerfil()
         this.setRecorrido()
     }

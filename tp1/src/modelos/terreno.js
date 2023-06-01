@@ -21,7 +21,8 @@ export class Terreno{
             vec3.fromValues(-30,0,0),
         ]
         this.recorrido = null
-        this.objeto3d = new Objeto3D()
+        this.objeto3d = new Objeto3D()    
+        this.objeto3d.setColor(100/255,187/255,109/255)
 
         this.crearRecorrido()
         this.crearDespOsilatorio()
