@@ -16,6 +16,7 @@ export class Objeto3D {
         this.escala = vec3.fromValues(1,1,1);
 
         this.matrizModelado = mat4.identity(mat4.create());
+        this.matrizModeladoSinEscala = mat4.identity(mat4.create());
     }
   
     actualizarMatrizModelado() {
@@ -24,6 +25,13 @@ export class Objeto3D {
         mat4.translate(this.matrizModelado,this.matrizModelado,this.posición)
         mat4.rotate(this.matrizModelado,this.matrizModelado,this.rotación[0],this.rotación[1])
         mat4.scale(this.matrizModelado,this.matrizModelado,this.escala)
+    }
+
+    actualizarMatrizModeladoSinEscala() {
+        // Método privado para actualizar la matriz de modelado según los atributos posición, rotación
+        mat4.identity(this.matrizModeladoSinEscala);
+        mat4.translate(this.matrizModeladoSinEscala,this.matrizModeladoSinEscala,this.posición)
+        mat4.rotate(this.matrizModeladoSinEscala,this.matrizModeladoSinEscala,this.rotación[0],this.rotación[1])
     }
   
     dibujar(matPadre, gl,shaderProgram, normal) {
@@ -36,8 +44,12 @@ export class Objeto3D {
   
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer){
 
+            this.actualizarMatrizModeladoSinEscala()
+            let m1 = mat4.create();
+            mat4.multiply(m1,matPadre,this.matrizModeladoSinEscala);
+            
             var normalMatrix = mat4.create();
-            mat4.invert(normalMatrix,m)
+            mat4.invert(normalMatrix,m1)
             mat4.transpose(normalMatrix,normalMatrix)
 
 

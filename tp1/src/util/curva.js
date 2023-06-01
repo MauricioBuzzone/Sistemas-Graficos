@@ -76,35 +76,40 @@ export class Curva {
         this.puntosDeControl = puntosDeControl
     }
 
+    getPunto(u){
+
+        var x = 0, y = 0, z = 0
+        var xt = 0, yt = 0, zt = 0
+
+        for(let i=0; i < this.puntosDeControl.length; i++){
+            x += this.bases[i](u)*this.puntosDeControl[i][0]
+            y += this.bases[i](u)*this.puntosDeControl[i][1]
+            z += this.bases[i](u)*this.puntosDeControl[i][2]
+
+            xt += this.basesder[i](u)*this.puntosDeControl[i][0]
+            yt += this.basesder[i](u)*this.puntosDeControl[i][1]
+            zt += this.basesder[i](u)*this.puntosDeControl[i][2]
+        }
+
+        var coords = vec3.fromValues(x,y,z)
+        var binormal = this.biNormal
+        var tangente = vec3.fromValues(xt,yt,zt)
+
+        var normal = vec3.fromValues(
+            binormal[1]*tangente[2]-binormal[2]*tangente[1],
+            binormal[2]*tangente[0]-binormal[0]*tangente[2],
+            binormal[0]*tangente[1]-binormal[1]*tangente[0])
+        
+        vec3.normalize(normal, normal);
+        vec3.normalize(tangente, tangente);
+        return new Punto(coords,tangente,normal,binormal)
+    }
+
     getDiscretizacion(step){
 
         var puntos = []
         for(let u=0; u<=1; u+=step){
-            var x = 0, y = 0, z = 0
-            var xt = 0, yt = 0, zt = 0
-
-            for(let i=0; i < this.puntosDeControl.length; i++){
-                x += this.bases[i](u)*this.puntosDeControl[i][0]
-                y += this.bases[i](u)*this.puntosDeControl[i][1]
-                z += this.bases[i](u)*this.puntosDeControl[i][2]
-
-                xt += this.basesder[i](u)*this.puntosDeControl[i][0]
-                yt += this.basesder[i](u)*this.puntosDeControl[i][1]
-                zt += this.basesder[i](u)*this.puntosDeControl[i][2]
-            }
-
-            var coords = vec3.fromValues(x,y,z)
-            var binormal = this.biNormal
-            var tangente = vec3.fromValues(xt,yt,zt)
-
-            var normal = vec3.fromValues(
-                binormal[1]*tangente[2]-binormal[2]*tangente[1],
-                binormal[2]*tangente[0]-binormal[0]*tangente[2],
-                binormal[0]*tangente[1]-binormal[1]*tangente[0])
-            
-            vec3.normalize(normal, normal);
-            vec3.normalize(tangente, tangente);
-            puntos.push(new Punto(coords,tangente,normal,binormal))
+            puntos.push(this.getPunto(u))
         }
         return puntos
     }

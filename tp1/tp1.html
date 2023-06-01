@@ -87,7 +87,8 @@
             import {Plano} from './src/modelos/plano.js'
             import {Cilindro} from './src/modelos/cilindro.js'
             import {Arbol, VarienteArbol} from './src/modelos/arbol.js'
-    
+            import {Tendido} from './src/modelos/tendido.js'
+
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 
@@ -135,10 +136,10 @@
                     alturaMin: 15,
                     alturaMax: 30,
                     alturaTorre: 18,
-                    separacionTorres: 16,
+                    separacionTorres: 19.2,
                 },
                 tensores: {
-                    separacionTensores: 1,
+                    separacionTensores: 2,
                 },
                 normal: false,
                 generar:function(){
@@ -218,15 +219,11 @@
                     
                     let arbol = randomToRange(0,2) < 0.5 ?  new Arbol(VarienteArbol.Pino):new Arbol()
                     
-                    let x = randomToRange(30,45)
+                    let x = (i % 2 != 0) ? randomToRange(-25,-45) : randomToRange(30,45)
                     let z = randomToRange(-35,35)
                     while( z < 5 &&  z > -5 )  z = randomToRange(-35,35)
-                    if(i % 2 != 0){
-                        x = randomToRange(-25,-45)
-                        
-                    }
-                    arbol.setPosicion(vec3.fromValues(x,-0.5,z))
                     
+                    arbol.setPosicion(vec3.fromValues(x,-0.5,z))
                     let escala = randomToRange(1,5)/10 +1
                     arbol.setEscala(vec3.fromValues(escala,1,escala))
                     nodoPadre.agregarHijo(arbol)
@@ -249,56 +246,22 @@
                 nodoRioBarco.agregarHijo(barco)
                 setInfoBarco(barco,nodoRioBarco)
 
+                // Creo los tentidos a los lados del puentes.
+                let tendido = new Tendido(carretera,parametros)
+                nodoPadre.agregarHijo(tendido)
+                tendido.setPosicion(vec3.fromValues(0,0,2.25))
 
-                /*
-                let comeinzoPuente = carretera.getRecorridoDisc(0.5)[1].getCoords()
-                let finPuente = carretera.getRecorridoDisc(0.5)[7].getCoords()
-                let puntosDeControl = [
-                    vec3.fromValues(0,comeinzoPuente[1],2*comeinzoPuente[2]),
-                    vec3.fromValues(0,(escena.alturaTorre-5)*2/3,2*comeinzoPuente[2]*1/3),
-                    vec3.fromValues(0,escena.alturaTorre-5,-escena.separacionTorres/2),
-                    vec3.fromValues(0,escena.alturaTorre-10,0),
-                    vec3.fromValues(0,escena.alturaTorre-5,escena.separacionTorres/2),
-                    vec3.fromValues(0,(escena.alturaTorre-5)*2/3,2*finPuente[2]*1/3),
-                    vec3.fromValues(0,finPuente[1],2*finPuente[2]),
-                ]
-                let recorridoCable = new CurvaGenerica([
-                    new Curva(Bases.Bezier2,[
-                        puntosDeControl[0],
-                        puntosDeControl[1],
-                        puntosDeControl[2],
-                    ]),
-                    new Curva(Bases.Bezier2,[
-                        puntosDeControl[2],
-                        puntosDeControl[3],
-                        puntosDeControl[4],
-                    ]),
-                    new Curva(Bases.Bezier2,[
-                        puntosDeControl[4],
-                        puntosDeControl[5],
-                        puntosDeControl[6],
-                    ]),
-                ])
 
-                // Creo los cables del puente     
-                let cable = new Cilindro()
-                cable.setRecorrido(recorridoCable)
-                cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
-                cable.setPosicion(vec3.fromValues(0,-0.5,2.25))
-                nodoPadre.agregarHijo(cable)
+                let tendido2 = new Tendido(carretera,parametros)
+                nodoPadre.agregarHijo(tendido2)
+                tendido2.setPosicion(vec3.fromValues(0,0,-2.25))
 
-                let cable2 = new Cilindro()
-                cable2.setRecorrido(recorridoCable)
-                cable2.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
-                cable2.setPosicion(vec3.fromValues(0,-0.5,-2.25))
-                nodoPadre.agregarHijo(cable2)
-                */
 
                 // Esfera que simula la fuente de luz
                 var esfera = new Objeto3D()
                 var buffersEsfera = crearGeometria("esfera",40,40)
                 esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2]) 
-                esfera.setPosicion(vec3.fromValues(10,30,10))
+                esfera.setPosicion(vec3.fromValues(10,50,10))
                 esfera.setEscala(vec3.fromValues(0.25,0.25,0.25))
                 nodoPadre.agregarHijo(esfera)
             }

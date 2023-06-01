@@ -20,6 +20,11 @@ export class CurvaGenerica {
         return discr
     }
 
+    getPunto(u){
+        let curva = Math.floor(u)
+        return this.curvas[curva].getPunto(u-curva)
+    }
+
     concat(curva){
         this.curvas.push(curva)
     }

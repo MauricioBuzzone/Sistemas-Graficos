@@ -25,7 +25,7 @@ function GUI (parametros){
             parametros.rio.alturaAct = altura     
         }
     );
-    f1.add(parametros.tensores, 'separacionTensores', -10.0, 30.0).name("separacion tensores").step(1);
+    f1.add(parametros.tensores, 'separacionTensores', 0.5, 5.0).name("separacion tensores").step(0.5);
 
     f1.add(parametros, 'normal').name("normales");    
     
