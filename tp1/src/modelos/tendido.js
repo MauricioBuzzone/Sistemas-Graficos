@@ -67,12 +67,6 @@ export class Tendido extends Objeto3D{
         ])
         puente.setBiNormal(vec3.fromValues(-1,0,0))
 
-        let cable1 = new Cilindro()
-        cable1.setRecorrido(puente)
-        cable1.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
-        super.agregarHijo(cable1)
-
-
         let cantTensores = Math.floor((2*fin[2] - 2*inicio[2])/parametros.tensores.separacionTensores)
         let step = 1/(cantTensores)
         

@@ -225,7 +225,7 @@
                     
                     arbol.setPosicion(vec3.fromValues(x,-0.5,z))
                     let escala = randomToRange(1,5)/10 +1
-                    arbol.setEscala(vec3.fromValues(escala,1,escala))
+                    arbol.setEscala(vec3.fromValues(escala,escala,escala))
                     nodoPadre.agregarHijo(arbol)
                 }
                 
@@ -261,7 +261,7 @@
                 var esfera = new Objeto3D()
                 var buffersEsfera = crearGeometria("esfera",40,40)
                 esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2]) 
-                esfera.setPosicion(vec3.fromValues(10,50,10))
+                esfera.setPosicion(vec3.fromValues(10.0,40.0,10.0))
                 esfera.setEscala(vec3.fromValues(0.25,0.25,0.25))
                 nodoPadre.agregarHijo(esfera)
             }

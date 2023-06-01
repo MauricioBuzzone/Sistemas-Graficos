@@ -1,4 +1,5 @@
 var mat4=glMatrix.mat4;
+var mat3=glMatrix.mat3;
 var vec3=glMatrix.vec3;
 var vec4=glMatrix.vec4;
 
@@ -43,15 +44,16 @@ export class Objeto3D {
         mat4.multiply(m,matPadre,this.matrizModelado);
   
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer){
-
+            
             this.actualizarMatrizModeladoSinEscala()
+           
             let m1 = mat4.create();
             mat4.multiply(m1,matPadre,this.matrizModeladoSinEscala);
             
             var normalMatrix = mat4.create();
             mat4.invert(normalMatrix,m1)
             mat4.transpose(normalMatrix,normalMatrix)
-
+            
 
             const trianglesVerticeBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
