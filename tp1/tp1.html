@@ -30,6 +30,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
         <script type="text/javascript" src="js/gl-matrix.js"></script>
         <script src="js/dat.gui.min.js"></script>
+        <script src="src/util/gui.js"></script>
         <script src="src/util/modulo-geometria.js"></script>
         <script id="shader-vs" type="x-shader/x-vertex">
 
@@ -87,7 +88,6 @@
             import {Cilindro} from './src/modelos/cilindro.js'
             import {Arbol, VarienteArbol} from './src/modelos/arbol.js'
     
-            
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 
@@ -97,8 +97,13 @@
             glProgram = null,
             fragmentShader = null,
             vertexShader = null;
-                
-               
+            
+            var shaderProgram;
+            var vertexShaderSource;
+            var fragmentShaderSource;
+            var vertexShaderFile="vertex-shader.glsl";
+            var fragmentShaderFile="fragment-shader.glsl";
+
             var modelMatrix = mat4.create();
             var viewMatrix = mat4.create();
             var projMatrix = mat4.create();
@@ -106,22 +111,36 @@
             var offset = 0.1
             var posBarco = 35
 
-            var vertexShaderFile="vertex-shader.glsl";
+
             var camara = new Camara()
 
             var nodoPadre = null
             var nodoRioBarco = null
-            var hijo1 = null
             var barco = null
 
-            var generator = new Math.seedrandom('Sistemas Gráficos –Trabajo Práctico Nº1 – 1er. Cuat. 2023');
+            var generator = null
 
-            var escena={
-                alturaMaxPuente:5,
-                alturaTorre:15,
-                alturaRio:-5,
-                separacionTorres:16,
-                s1:5,
+            var parametros ={
+                rio: {
+                    alturaMin:-7,
+                    alturaMax:-3,
+                    alturaAct:-5,
+                },
+                puente: {
+                    alturaMin: 0,
+                    alturaMax: 15,
+                    alturaAct: 8,  
+                },
+                torres: {
+                    alturaMin: 15,
+                    alturaMax: 30,
+                    alturaTorre: 18,
+                    separacionTorres: 16,
+                },
+                tensores: {
+                    separacionTensores: 1,
+                },
+                normal: false,
                 generar:function(){
                     crearEscena()
                 },      
@@ -137,14 +156,6 @@
                 }, 
             };
 
-            function setEstrategiaCamara(estrategia){
-                camara.setEstrategia(estrategia)
-            }
-
-            function setInfoBarco(barco,padreBarco){
-                camara.setBarcoInfo(barco,padreBarco)
-            }
-
             function initWebGL(){
 
                 canvas = document.getElementById("my-canvas");  
@@ -159,7 +170,8 @@
                 if(gl) {
 
                     setupWebGL();
-                    GUI();
+                    initShaders();
+                    GUI(parametros);
                     crearEscena();
                     tick();   
 
@@ -168,7 +180,6 @@
                 }
 
             }
-           
 
             function crearEscena(){
                 generator = new Math.seedrandom('Sistemas Gráficos');
@@ -183,32 +194,29 @@
                 nodoPadre.agregarHijo(terreno)
                 
                 // Creo la carretera
-                let carretera = new Carretera(escena.alturaMaxPuente)
+                let carretera = new Carretera(parametros.puente.alturaAct)
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
                 carretera.setEscala(vec3.fromValues(0.25,1,2.5))
                 nodoPadre.agregarHijo(carretera)
-
+                
                 // Creo las 4 torres del puente 
                 let torres = []
                 for(let i=0; i<4; i++){
-                    let torre = new Torre(escena.alturaTorre)
+                    let torre = new Torre(parametros.torres.alturaTorre)
                     torre.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
                     nodoPadre.agregarHijo(torre)
                     torres.push(torre)
                 }
-                torres[0].setPosicion(vec3.fromValues(escena.separacionTorres/2,-7,2.25))
-                torres[1].setPosicion(vec3.fromValues(escena.separacionTorres/2,-7,-2.25))
-                torres[2].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-7,2.25))
-                torres[3].setPosicion(vec3.fromValues(-escena.separacionTorres/2,-7,-2.25))
+                torres[0].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,2.25))
+                torres[1].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,-2.25))
+                torres[2].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,2.25))
+                torres[3].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,-2.25))
             
                 // Creo todos arboles 
-                for(let i=0; i < randomToRange(10,15);i++){
+                for(let i=0; i < randomToRange(20,35);i++){
                     
-                    let arbol = new Arbol()
-                    if(randomToRange(0,2) < 0.5){
-                        arbol = new Arbol(VarienteArbol.Pino)
-                    }
+                    let arbol = randomToRange(0,2) < 0.5 ?  new Arbol(VarienteArbol.Pino):new Arbol()
                     
                     let x = randomToRange(30,45)
                     let z = randomToRange(-35,35)
@@ -217,7 +225,7 @@
                         x = randomToRange(-25,-45)
                         
                     }
-                    arbol.setPosicion(vec3.fromValues(x,0,z))
+                    arbol.setPosicion(vec3.fromValues(x,-0.5,z))
                     
                     let escala = randomToRange(1,5)/10 +1
                     arbol.setEscala(vec3.fromValues(escala,1,escala))
@@ -225,21 +233,19 @@
                 }
                 
 
-                // Rio y barco
+                // Creo el rio y barco con sus containers
                 nodoRioBarco = new Objeto3D()
                 nodoPadre.agregarHijo(nodoRioBarco)
-                nodoRioBarco.setPosicion(vec3.fromValues(0,escena.alturaRio,0))
+                nodoRioBarco.setPosicion(vec3.fromValues(0,parametros.rio.alturaAct,0))
 
-                
-                let plano = new Plano()
-                nodoRioBarco.agregarHijo(plano)
-                plano.setEscala(vec3.fromValues(1,40,40))
-                plano.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                let rio = new Plano()
+                nodoRioBarco.agregarHijo(rio)
+                rio.setEscala(vec3.fromValues(1,40,40))
+                rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
 
                 barco = new Barco()
                 barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
                 nodoRioBarco.agregarHijo(barco)
-
                 setInfoBarco(barco,nodoRioBarco)
 
 
@@ -296,43 +302,16 @@
                 nodoPadre.agregarHijo(esfera)
             }
 
+            function setEstrategiaCamara(estrategia){
+                camara.setEstrategia(estrategia)
+            }
+
+            function setInfoBarco(barco,padreBarco){
+                camara.setBarcoInfo(barco,padreBarco)
+            }
             function randomToRange(min, max){
                 return Math.floor(generator() * (max - min)) + min;
             }
-            function GUI (){
-                var gui = new dat.GUI();		
-                var f1 = gui.addFolder('Menú');		
-            
-                f1.add(escena, 'alturaMaxPuente', 0.0, 12.0).name("altura puente")
-                    .step(1)
-                    .onChange(function(alturaPuente){
-                        escena.alturaMaxPuente = alturaPuente
-                });
-                f1.add(escena, 'alturaTorre', escena.alturaMaxPuente, 30.0).name("altura torres")
-                    .step(1)
-                    .onChange(function(alturaTorre){
-                    if (escena.alturaMaxPuente <= alturaTorre+7){
-                        escena.alturaTorre = alturaTorre
-                    }else{
-                        escena.alturaTorre = escena.alturaMaxPuente +7
-                    }
-                    
-                });
-                f1.add(escena, 's1', -10.0, 30.0).name("separacion tensores").step(1);
-                f1.add(escena, 'alturaRio', -6.0, -1.0).name("altura rio")
-                    .step(0.5)
-                    .onChange(function(altRio){
-                        escena.alturaRio = altRio     
-                });
-                f1.add(escena, 'generar').name("generar");
-                f1.open(); 
-
-                var f2 = gui.addFolder('Camaras');	
-                f2.add(escena, 'orbital').name("Orbital");
-                f2.add(escena, 'drone').name("Drone");	
-                f2.add(escena, 'barco').name("Barco");	
-            };
-
 
             function setupWebGL(){
                 gl.enable(gl.DEPTH_TEST);
@@ -343,7 +322,6 @@
                 gl.viewport(0, 0, canvas.width, canvas.height);
 
                 // Matrix de Proyeccion Perspectiva
-
                 mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 150.0);
                 
                 mat4.identity(modelMatrix);
@@ -351,9 +329,15 @@
                 mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, 20.0]);
             }
                 
+            function setMatrixUniforms(){
+                var viewMatrixUniform  = gl.getUniformLocation(shaderProgram, "viewMatrix");
+                var projMatrixUniform  = gl.getUniformLocation(shaderProgram, "projMatrix");
+                gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
+                gl.uniformMatrix4fv(projMatrixUniform, false, projMatrix);
+            }
             function drawScene(){
-                //setupVertexShaderMatrix()
-                nodoPadre.dibujar(modelMatrix,gl,viewMatrix,projMatrix)
+                setMatrixUniforms()
+                nodoPadre.dibujar(modelMatrix,gl,shaderProgram,parametros.normal)
             }
 
 
@@ -376,16 +360,87 @@
             }
             
             function tick(){
-
                 requestAnimationFrame(tick);
                 drawScene();
                 animate();
             }
 
-            window.onload=initWebGL;
+            function loadShaders(){
+                $.when(loadVS(),loadFS()).done(function(res1,res2){
+                    //this code is executed when all ajax calls are done     
+                    initWebGL();
+                });
+                function loadVS() {
+                    return  $.ajax({
+                        url: "shaders/"+vertexShaderFile,
+                        success: function(result){
+                            vertexShaderSource=result;
+                        }
+                    });
+                } 
+                function loadFS() {
+                    return  $.ajax({
+                        url: "shaders/"+fragmentShaderFile,
+                        success: function(result){
+                            fragmentShaderSource=result;    
+    
+                        }
+                    });
+                }
+            }
 
+            function getShader(gl,code,type) {
+
+                var shader;
+
+                if (type == "fragment") 
+                    shader = gl.createShader(gl.FRAGMENT_SHADER);
+                else // "vertex"
+                    shader = gl.createShader(gl.VERTEX_SHADER);
+
+                gl.shaderSource(shader, code);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error(gl.getShaderInfoLog(shader));
+                    return null;
+                }    
+                return shader;
+            }
+
+            function onResize(){
+                gl.canvas.width=$canvas.width();
+                gl.canvas.height=$canvas.height();
+                aspect=$canvas.width()/$canvas.height();
+            }
+
+            function getShaderSource(url) {
+                var req = new XMLHttpRequest();
+                req.open("GET", url, false);
+                req.send(null);
+                return (req.status == 200) ? req.responseText : null;
+            }; 
+
+            function initShaders() {
+
+                var fragmentShader= getShader(gl, vertexShaderSource,"vertex");
+                var vertexShader= getShader(gl, fragmentShaderSource,"fragment");
+
+                shaderProgram = gl.createProgram();
+                gl.attachShader(shaderProgram, vertexShader);
+                gl.attachShader(shaderProgram, fragmentShader);
+                gl.linkProgram(shaderProgram);
+
+                if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                    alert("Could not initialise shaders");
+                }
+
+                gl.useProgram(shaderProgram);
+            }
+            
+            $(document).ready(function(){
+                loadShaders();
+            })
         </script>
-
-
     </body>
 </html>

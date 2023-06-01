@@ -11,6 +11,9 @@ const orbitalId  = '1'
 const droneId  = '2'
 const barcoId  = '3'
 
+
+
+
 export class Camara {
     constructor(){
 

@@ -28,8 +28,8 @@ export class Terreno{
         this.discretizar(perfilStep,recorridoStep)
     }
 
-    dibujar(modelMatrix,gl,viewMatrix,projMatrix){
-        this.objeto3d.dibujar(modelMatrix,gl,viewMatrix,projMatrix)
+    dibujar(modelMatrix,gl,shaderProgram,normal){
+        this.objeto3d.dibujar(modelMatrix,gl,shaderProgram, normal)
     }
 
     discretizar(perfilStep,recorridoStep){

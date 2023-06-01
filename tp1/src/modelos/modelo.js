@@ -14,7 +14,7 @@ export class Modelo extends Objeto3D{
         this.supBarrido = new SuperficieBarrido()
     }
 
-    dibujar(matPadre, gl, viewMatrix, projMatrix) {
+    dibujar(matPadre, gl, shaderProgram, normal) {
         if (this.buffers == null ){
             this.buffers = this.supBarrido.getBuffers(
                 this.getPerfil(this.stepPerfil),
@@ -27,7 +27,7 @@ export class Modelo extends Objeto3D{
                 this.buffers[2], // indexBuffer
             )
         }
-        super.dibujar(matPadre, gl, viewMatrix, projMatrix)
+        super.dibujar(matPadre, gl, shaderProgram, normal)
     }
 
 
