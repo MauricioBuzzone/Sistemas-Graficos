@@ -93,41 +93,57 @@ export class Objeto3D {
             gl.drawElements( gl.TRIANGLE_STRIP, trianglesIndexBuffer.number_vertex_point, gl.UNSIGNED_SHORT, 0);    
             
             if(normal){
-                this.dibujarNormales(gl, shaderProgram)
+                this.dibujarNormales(matPadre, gl, shaderProgram)
             }
         }
 
         for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl,shaderProgram, normal);
     }
 
-    dibujarNormales(gl, shaderProgram){
+    dibujarNormales(matPadre, gl, shaderProgram){
         // Creo el buffer de vertices
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer){
             var vertices = []
-
+            let escala = this.escala
             for(let i=0; i < this.positionBuffer.length;i +=3){
                 var pointNormal = vec3.create()
-                
+
+
                 var normal = vec3.fromValues(
                     this.normalBuffer[i],
                     this.normalBuffer[i+1],
                     this.normalBuffer[i+2])
 
                 var source = vec3.fromValues(
-                        this.positionBuffer[i],
-                        this.positionBuffer[i+1],
-                        this.positionBuffer[i+2])
+                        this.positionBuffer[i]*escala[0],
+                        this.positionBuffer[i+1]*escala[1],
+                        this.positionBuffer[i+2]*escala[2])
 
                 vec3.add(pointNormal,source,normal)
             
-                vertices.push(this.positionBuffer[i])
-                vertices.push(this.positionBuffer[i+1])
-                vertices.push(this.positionBuffer[i+2])
+                vertices.push(this.positionBuffer[i]*escala[0])
+                vertices.push(this.positionBuffer[i+1]*escala[1])
+                vertices.push(this.positionBuffer[i+2]*escala[2])
 
                 vertices.push(pointNormal[0])
                 vertices.push(pointNormal[1])
                 vertices.push(pointNormal[2])
             }
+
+            mat4.identity(this.matrizModelado)
+            mat4.translate(this.matrizModelado,this.matrizModelado,this.posición)
+            mat4.rotate(this.matrizModelado,this.matrizModelado,this.rotación[0],this.rotación[1])
+
+            let m = mat4.create();
+            mat4.multiply(m,matPadre,this.matrizModelado);
+
+            var modelMatrixUniform = gl.getUniformLocation(shaderProgram, "modelMatrix");
+            var normalMatrixUniform  = gl.getUniformLocation(shaderProgram, "normalMatrix");
+
+            gl.uniformMatrix4fv(modelMatrixUniform, false,m);
+            gl.uniformMatrix4fv(normalMatrixUniform, false,  mat4.identity(mat4.create()));
+
+
 
             const trianglesVerticeBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);

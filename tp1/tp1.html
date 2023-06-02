@@ -187,13 +187,13 @@
 
                 nodoPadre = new Objeto3D();
                 nodoPadre.setPosicion(vec3.fromValues(0,0,0))
-                
+
                 // Creo el terreno
                 let terreno = new Terreno(0.1,0.01)
                 terreno.setEscala(vec3.fromValues(2.5,1,1))
                 terreno.setPosicion(vec3.fromValues(0,0,0))
                 nodoPadre.agregarHijo(terreno)
-                
+
                 // Creo la carretera
                 let carretera = new Carretera(parametros.puente.alturaAct)
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
@@ -264,6 +264,7 @@
                 esfera.setPosicion(vec3.fromValues(10.0,40.0,10.0))
                 esfera.setEscala(vec3.fromValues(0.25,0.25,0.25))
                 nodoPadre.agregarHijo(esfera)
+                
             }
 
             function setEstrategiaCamara(estrategia){
