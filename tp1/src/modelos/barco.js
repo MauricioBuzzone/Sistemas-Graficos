@@ -24,28 +24,26 @@ export class Barco extends Objeto3D{
         this.cascoBarco.setColor(colores[0][0],colores[0][1],colores[0][2])
 
 
-        this.cabina = new Cubo()
+        this.cabina = new Cubo(5,3,2)
         this.agregarHijo(this.cabina)
         this.cabina.setPosicion(vec3.fromValues(0,3,4))
-        this.cabina.setEscala(vec3.fromValues(2.5,1,1))
         this.cabina.setColor(colores[0][0],colores[0][1],colores[0][2])
+        
 
-
-        this.techoCabina = new Cubo()
+        this.techoCabina = new Cubo(6,1,3)
         this.agregarHijo(this.techoCabina)
-        this.techoCabina.setPosicion(vec3.fromValues(0,4,4))
-        this.techoCabina.setEscala(vec3.fromValues(3,0.5,1.5))
+        this.techoCabina.setPosicion(vec3.fromValues(0,5,4))
         this.techoCabina.setColor(colores[0][0],colores[0][1],colores[0][2])
-            
+        
         let cantContainer = 0
         let posPrimerFila = Math.floor(CANT_FILAS/2)
         let postUlt = CANT_FILAS - posPrimerFila
         for(let i=0; i < CANT_COL; i++){
             for(let j=-posPrimerFila; j < postUlt; j++){
                 if( cantContainer < CANT_CONTAINER){
-                    let container = new Cubo()
+                    let container = new Cubo(1,1,3)
                     this.agregarHijo(container)
-                    container.setEscala(vec3.fromValues(0.5,0.5,1))  
+                   
                     container.setPosicion(vec3.fromValues(j*1.1,2.5+i*1.1,0))
                     
                     let coloresSize = colores.length

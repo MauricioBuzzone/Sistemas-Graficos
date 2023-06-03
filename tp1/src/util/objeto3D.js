@@ -27,13 +27,6 @@ export class Objeto3D {
         mat4.rotate(this.matrizModelado,this.matrizModelado,this.rotación[0],this.rotación[1])
         mat4.scale(this.matrizModelado,this.matrizModelado,this.escala)
     }
-
-    actualizarMatrizModeladoSinEscala() {
-        // Método privado para actualizar la matriz de modelado según los atributos posición, rotación
-        mat4.identity(this.matrizModeladoSinEscala);
-        mat4.translate(this.matrizModeladoSinEscala,this.matrizModeladoSinEscala,this.posición)
-        mat4.rotate(this.matrizModeladoSinEscala,this.matrizModeladoSinEscala,this.rotación[0],this.rotación[1])
-    }
   
     dibujar(matPadre, gl,shaderProgram, normal) {
         // Método público para dibujar el objeto en pantalla, se recibe la matriz del padre
@@ -44,14 +37,9 @@ export class Objeto3D {
         mat4.multiply(m,matPadre,this.matrizModelado);
   
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer){
-            
-            this.actualizarMatrizModeladoSinEscala()
-           
-            let m1 = mat4.create();
-            mat4.multiply(m1,matPadre,this.matrizModeladoSinEscala);
-            
+                
             var normalMatrix = mat4.create();
-            mat4.invert(normalMatrix,m1)
+            mat4.invert(normalMatrix,m)
             mat4.transpose(normalMatrix,normalMatrix)
             
 
@@ -104,7 +92,7 @@ export class Objeto3D {
         // Creo el buffer de vertices
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer){
             var vertices = []
-            let escala = this.escala
+
             for(let i=0; i < this.positionBuffer.length;i +=3){
                 var pointNormal = vec3.create()
 
@@ -115,35 +103,20 @@ export class Objeto3D {
                     this.normalBuffer[i+2])
 
                 var source = vec3.fromValues(
-                        this.positionBuffer[i]*escala[0],
-                        this.positionBuffer[i+1]*escala[1],
-                        this.positionBuffer[i+2]*escala[2])
+                        this.positionBuffer[i],
+                        this.positionBuffer[i+1],
+                        this.positionBuffer[i+2])
 
                 vec3.add(pointNormal,source,normal)
             
-                vertices.push(this.positionBuffer[i]*escala[0])
-                vertices.push(this.positionBuffer[i+1]*escala[1])
-                vertices.push(this.positionBuffer[i+2]*escala[2])
+                vertices.push(this.positionBuffer[i])
+                vertices.push(this.positionBuffer[i+1])
+                vertices.push(this.positionBuffer[i+2])
 
                 vertices.push(pointNormal[0])
                 vertices.push(pointNormal[1])
                 vertices.push(pointNormal[2])
             }
-
-            mat4.identity(this.matrizModelado)
-            mat4.translate(this.matrizModelado,this.matrizModelado,this.posición)
-            mat4.rotate(this.matrizModelado,this.matrizModelado,this.rotación[0],this.rotación[1])
-
-            let m = mat4.create();
-            mat4.multiply(m,matPadre,this.matrizModelado);
-
-            var modelMatrixUniform = gl.getUniformLocation(shaderProgram, "modelMatrix");
-            var normalMatrixUniform  = gl.getUniformLocation(shaderProgram, "normalMatrix");
-
-            gl.uniformMatrix4fv(modelMatrixUniform, false,m);
-            gl.uniformMatrix4fv(normalMatrixUniform, false,  mat4.identity(mat4.create()));
-
-
 
             const trianglesVerticeBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);

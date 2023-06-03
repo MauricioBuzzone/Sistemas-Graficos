@@ -88,7 +88,7 @@
             import {Cilindro} from './src/modelos/cilindro.js'
             import {Arbol, VarienteArbol} from './src/modelos/arbol.js'
             import {Tendido} from './src/modelos/tendido.js'
-
+            
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
 
@@ -123,8 +123,8 @@
 
             var parametros ={
                 rio: {
-                    alturaMin:-7,
-                    alturaMax:-3,
+                    alturaMin:-6,
+                    alturaMax:-2,
                     alturaAct:-5,
                 },
                 puente: {
@@ -190,7 +190,6 @@
 
                 // Creo el terreno
                 let terreno = new Terreno(0.1,0.01)
-                terreno.setEscala(vec3.fromValues(2.5,1,1))
                 terreno.setPosicion(vec3.fromValues(0,0,0))
                 nodoPadre.agregarHijo(terreno)
 
@@ -198,7 +197,6 @@
                 let carretera = new Carretera(parametros.puente.alturaAct)
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
-                carretera.setEscala(vec3.fromValues(0.25,1,2.5))
                 nodoPadre.agregarHijo(carretera)
                 
                 // Creo las 4 torres del puente 
@@ -235,10 +233,9 @@
                 nodoPadre.agregarHijo(nodoRioBarco)
                 nodoRioBarco.setPosicion(vec3.fromValues(0,parametros.rio.alturaAct,0))
 
-                let rio = new Plano()
+                let rio = new Plano(78.5,100)
                 rio.setColor(30/255,172/255,238/255)
                 nodoRioBarco.agregarHijo(rio)
-                rio.setEscala(vec3.fromValues(1,40,40))
                 rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
 
                 barco = new Barco()
@@ -255,7 +252,6 @@
                 let tendido2 = new Tendido(carretera,parametros)
                 nodoPadre.agregarHijo(tendido2)
                 tendido2.setPosicion(vec3.fromValues(0,0,-2.25))
-
 
                 // Esfera que simula la fuente de luz
                 var esfera = new Objeto3D()

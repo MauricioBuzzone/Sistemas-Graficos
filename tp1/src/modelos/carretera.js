@@ -109,13 +109,13 @@ export class Carretera extends Modelo{
 
     setRecorrido(altura){
         let puntosDeControl = [
-            vec3.fromValues(0,0,-20),  
-            vec3.fromValues(0,0,-15),
-            vec3.fromValues(0,0,-12), 
+            vec3.fromValues(0,0,-50),  
+            vec3.fromValues(0,0,-37.5),
+            vec3.fromValues(0,0,-30), 
             vec3.fromValues(0,altura,0), 
-            vec3.fromValues(0,0,12), 
-            vec3.fromValues(0,0,15), 
-            vec3.fromValues(0,0,20), 
+            vec3.fromValues(0,0,30), 
+            vec3.fromValues(0,0,37.5), 
+            vec3.fromValues(0,0,50), 
         ]
 
         this.recorrido = new CurvaGenerica([
@@ -139,25 +139,25 @@ export class Carretera extends Modelo{
     }
     setPerfil(){
         let puntosDeControl = [
-            vec3.fromValues(-10,-1,0),
+            vec3.fromValues(-2.5,-1,0),
             vec3.fromValues(0,-1,0),
-            vec3.fromValues(10,-1,0),
-            vec3.fromValues(10,0,0),
-            vec3.fromValues(10,0,0),
-            vec3.fromValues(9,0,0),
-            vec3.fromValues(8,0,0),
-            vec3.fromValues(7.8,0,0),
-            vec3.fromValues(7.8,-0.2,0),
-            vec3.fromValues(7.6,-0.2,0),
-            vec3.fromValues(-7.6,-0.2,0),
-            vec3.fromValues(-7.6,-0.2,0),
-            vec3.fromValues(-7.8,-0.2,0),
-            vec3.fromValues(-7.8,0,0),
-            vec3.fromValues(-8,0,0),
-            vec3.fromValues(-9,0,0),
-            vec3.fromValues(-10,0,0),
-            vec3.fromValues(-10,0,0), 
-            vec3.fromValues(-10,-1,0), 
+            vec3.fromValues(2.5,-1,0),
+            vec3.fromValues(2.5,0,0),
+            vec3.fromValues(2.5,0,0),
+            vec3.fromValues(2.25,0,0),
+            vec3.fromValues(2,0,0),
+            vec3.fromValues(1.95,0,0),
+            vec3.fromValues(1.95,-0.2,0),
+            vec3.fromValues(1.9,-0.2,0),
+            vec3.fromValues(-1.9,-0.2,0),
+            vec3.fromValues(-1.9,-0.2,0),
+            vec3.fromValues(-1.95,-0.2,0),
+            vec3.fromValues(-1.95,0,0),
+            vec3.fromValues(-2,0,0),
+            vec3.fromValues(-2.25,0,0),
+            vec3.fromValues(-2.5,0,0),
+            vec3.fromValues(-2.5,0,0), 
+            vec3.fromValues(-2.5,-1,0), 
         ]
         this.perfil = new CurvaGenerica([
             new Curva(Bases.Bezier2,[

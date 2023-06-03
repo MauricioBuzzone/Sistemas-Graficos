@@ -12,13 +12,13 @@ export class Terreno{
         this.amplitud = 4
         this.despOsilatorio = null
         this.puntosDeCotrol = [
-            vec3.fromValues(30,0,0),
-            vec3.fromValues(10,0,0),
-            vec3.fromValues(5,-6,0),
-            vec3.fromValues(1,-7,0),
-            vec3.fromValues(-5,-6,0),
-            vec3.fromValues(-10,0,0),
-            vec3.fromValues(-30,0,0),
+            vec3.fromValues(75,0,0),
+            vec3.fromValues(25,0,0),
+            vec3.fromValues(12.5,-6,0),
+            vec3.fromValues(2.5,-7,0),
+            vec3.fromValues(-12.5,-6,0),
+            vec3.fromValues(-25,0,0),
+            vec3.fromValues(-75,0,0),
         ]
         this.recorrido = null
         this.objeto3d = new Objeto3D()    

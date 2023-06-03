@@ -21,7 +21,7 @@ export class Arbol extends Objeto3D{
 
         this.copa = new CopaArbol(variante)
         this.copa.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-        this.copa.setEscala(vec3.fromValues(0.75,0.8,0.8))
+        this.copa.setEscala(vec3.fromValues(0.8,0.8,0.8))
         this.copa.setPosicion(vec3.fromValues(0,1,0))
 
         super.agregarHijo(this.tronco)

@@ -6,15 +6,19 @@ var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
 export class Cubo extends Modelo{
-    constructor(){
+    constructor(l1=1,l2=1,l3=1){
         super()
         this.stepPerfil = 1
         this.stepRecorrido = 1
-
-        this.tapaDelantera = new Plano()
-        this.tapaTrasera = new Plano()
+        this.l1 = l1
+        this.l2 = l2
+        this.l3 = l3
+        this.tapaDelantera = new Plano(l1,l2)
+        this.tapaTrasera = new Plano(l1,l2)
         this.tapaDelantera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+        this.tapaDelantera.setPosicion(vec3.fromValues(0,0,this.l3/2))
         this.tapaTrasera.setRotacion([-Math.PI/2,vec3.fromValues(0,1,0)])
+        this.tapaTrasera.setPosicion(vec3.fromValues(0,0,-this.l3/2))
         this.agregarHijo(this.tapaDelantera)
         this.agregarHijo(this.tapaTrasera)
 
@@ -28,15 +32,15 @@ export class Cubo extends Modelo{
     }
     setPerfil(){
         let puntosDeControl = [
-            vec3.fromValues(1,-1,0),
-            vec3.fromValues(1,0,0),
-            vec3.fromValues(1,1,0),
-            vec3.fromValues(0,1,0),
-            vec3.fromValues(-1,1,0),
-            vec3.fromValues(-1,0,0),
-            vec3.fromValues(-1,-1,0),
-            vec3.fromValues(0,-1,0),
-            vec3.fromValues(1,-1,0)
+            vec3.fromValues(this.l1/2,-this.l2/2,0),
+            vec3.fromValues(this.l1/2,0,0),
+            vec3.fromValues(this.l1/2,this.l2/2,0),
+            vec3.fromValues(0,this.l2/2,0),
+            vec3.fromValues(-this.l1/2,this.l2/2,0),
+            vec3.fromValues(-this.l1/2,0,0),
+            vec3.fromValues(-this.l1/2,-this.l2/2,0),
+            vec3.fromValues(0,-this.l2/2,0),
+            vec3.fromValues(this.l1/2,-this.l2/2,0)
         ]
         this.perfil = new CurvaGenerica([
             new Curva(Bases.Bezier2,[
@@ -65,9 +69,9 @@ export class Cubo extends Modelo{
 
     setRecorrido(){
         let puntosDeControl = [
-            vec3.fromValues(0,0,-1),
+            vec3.fromValues(0,0,-this.l3/2),
             vec3.fromValues(0,0,0),
-            vec3.fromValues(0,0,1),
+            vec3.fromValues(0,0,this.l3/2),
         ]
 
         this.recorrido = new CurvaGenerica([

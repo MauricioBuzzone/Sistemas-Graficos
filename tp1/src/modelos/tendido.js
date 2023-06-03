@@ -17,8 +17,8 @@ export class Tendido extends Objeto3D{
         let fin = camino[20].getCoords()
 
         let puntosDeControl = [
-            vec3.fromValues(0,2*inicio[1],2*inicio[2]),
-            vec3.fromValues(0,(parametros.torres.alturaTorre-8)*1/3,2*inicio[2]*2/3),
+            vec3.fromValues(0,inicio[1],inicio[2]),
+            vec3.fromValues(0,(parametros.torres.alturaTorre-8)*1/3,inicio[2]*2/3),
             vec3.fromValues(0,parametros.torres.alturaTorre-8,-parametros.torres.separacionTorres/2),
 
             vec3.fromValues(0,parametros.torres.alturaTorre-10,-parametros.torres.separacionTorres/4),
@@ -26,8 +26,8 @@ export class Tendido extends Objeto3D{
             vec3.fromValues(0,parametros.torres.alturaTorre-10,parametros.torres.separacionTorres/4),
 
             vec3.fromValues(0,parametros.torres.alturaTorre-8,parametros.torres.separacionTorres/2),
-            vec3.fromValues(0,(parametros.torres.alturaTorre-8)*1/3,2*fin[2]*2/3),
-            vec3.fromValues(0,2*fin[1],2*fin[2]),
+            vec3.fromValues(0,(parametros.torres.alturaTorre-8)*1/3,fin[2]*2/3),
+            vec3.fromValues(0,fin[1],fin[2]),
         ]
 
         let recorridoCable = new CurvaGenerica([
@@ -61,13 +61,13 @@ export class Tendido extends Objeto3D{
         super.agregarHijo(cable)
 
         let puente = new Curva(Bases.Bezier2,[
-            vec3.fromValues(0,2*inicio[1],2*inicio[2]),
-            vec3.fromValues(0,parametros.puente.alturaAct*0.7,0), 
-            vec3.fromValues(0,2*fin[1],2*fin[2]),
+            vec3.fromValues(0,inicio[1],inicio[2]),
+            vec3.fromValues(0,parametros.puente.alturaAct*0.9,0), 
+            vec3.fromValues(0,fin[1],fin[2]),
         ])
         puente.setBiNormal(vec3.fromValues(-1,0,0))
 
-        let cantTensores = Math.floor((2*fin[2] - 2*inicio[2])/parametros.tensores.separacionTensores)
+        let cantTensores = Math.floor((fin[2] - inicio[2])/parametros.tensores.separacionTensores)
         let step = 1/(cantTensores)
         
         for(let i=0; i<1;i+=step){
