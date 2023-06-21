@@ -1,0 +1,342 @@
+<!doctype html>
+<html>
+    <head>
+        <title></title>        
+        <style>
+            body{ background-color: rgb(110, 196, 218); }
+            canvas{ background-color: rgb(110, 196, 218); }
+			textarea{ background-color: black; foreground-color: white;}
+
+            *{
+            font-family: Arial, Helvetica, sans-serif;   
+            }
+            #log {
+                position: absolute;
+                top:50px;
+                left: 100px;
+                z-index: 300;
+            }
+        </style>
+    </head>
+    <body>
+        </div> 
+    	<center>
+            		            
+            <canvas id="my-canvas" width="1000" height="800">
+            	Your browser does not support the HTML5 canvas element.
+    		</canvas>    		
+    	</center>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
+        <script type="text/javascript" src="js/gl-matrix.js"></script>
+        <script src="js/dat.gui.min.js"></script>
+        <script src="src/util/gui.js"></script>
+        <script src="src/util/modulo-geometria.js"></script>
+        <script id="shader-vs" type="x-shader/x-vertex">
+
+            precision highp float;
+
+            attribute vec3 aVertexPosition;
+            attribute vec3 aVertexNormal;
+
+            uniform mat4 modelMatrix;            
+            uniform mat4 viewMatrix;
+            uniform mat4 projMatrix;
+
+            uniform mat4 normalMatrix;
+
+            varying vec3 vNormal;    
+            varying vec3 vPosWorld;  
+
+            void main(void) {
+                gl_Position = projMatrix * viewMatrix * modelMatrix * vec4(aVertexPosition, 1.0);
+
+                vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz;    //la posicion en coordenadas de mundo
+                vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz;       //la normal en coordenadas de mundo                
+                
+            }
+        </script>
+
+        <script id="shader-fs" type="x-shader/x-fragment">
+            precision highp float;
+            varying vec3 vNormal;
+            varying vec3 vPosWorld;
+
+            void main(void) {
+
+                vec3 lightVec=normalize(vec3(0.0,10.0,0.0)-vPosWorld);
+                vec3 diffColor=mix(vec3(0.7,0.7,0.7),vNormal,0.4);
+                vec3 color=dot(lightVec,vNormal)*diffColor+vec3(0.2,0.2,0.2);
+
+               gl_FragColor = vec4(color,1.0);
+            }
+        </script>
+        
+        <script type="module" >
+
+            import {Objeto3D}  from './src/util/objeto3D.js';
+            import {Curva, Bases} from './src/util/curva.js'
+            import {CurvaGenerica} from './src/util/curvaGenerica.js'
+            import {Camara, Estrategia} from './src/util/camara.js'
+            import {Punto} from './src/util/punto.js'
+
+            import {Carretera} from './src/modelos/carretera.js'
+            import {Torre} from './src/modelos/torre.js'
+            import {Terreno} from './src/modelos/terreno.js'
+            import {Barco} from './src/modelos/barco.js'
+            import {Plano} from './src/modelos/plano.js'
+            import {Cilindro} from './src/modelos/cilindro.js'
+            import {Arbol, VarienteArbol} from './src/modelos/arbol.js'
+            import {Tendido} from './src/modelos/tendido.js'
+            
+            import {Textured} from './src/materiales/skybox.js'
+            import {Phong} from './src/materiales/shaderProgram.js'
+
+            var mat4=glMatrix.mat4;
+            var vec3=glMatrix.vec3;
+
+            var gl = null,
+            canvas = null,
+
+            glProgram = null,
+            fragmentShader = null,
+            vertexShader = null;
+            
+            var glProgram = null;
+            var shaderProgram = null
+            var vertexShaderSource;
+            var fragmentShaderSource;
+            var vertexShaderFile="vertex-shader.glsl";
+            var fragmentShaderFile="fragment-shader.glsl";
+
+            var modelMatrix = mat4.create();
+            var viewMatrix = mat4.create();
+            var projMatrix = mat4.create();
+             
+            var offset = 0.1
+            var posBarco = 35
+
+
+            var camara = new Camara()
+
+            var nodoPadre = null
+            var nodoRioBarco = null
+            var barco = null
+
+            var generator = null
+
+            var parametros ={
+                rio: {
+                    alturaMin:-6,
+                    alturaMax:-2,
+                    alturaAct:-5,
+                },
+                puente: {
+                    alturaMin: 0,
+                    alturaMax: 15,
+                    alturaAct: 8,  
+                },
+                torres: {
+                    alturaMin: 15,
+                    alturaMax: 30,
+                    alturaTorre: 18,
+                    separacionTorres: 19.2,
+                },
+                tensores: {
+                    separacionTensores: 2,
+                },
+                normal: false,
+                generar:function(){
+                    crearEscena()
+                },      
+                orbital:function(){
+                    setEstrategiaCamara(Estrategia.Orbital)
+                }, 
+                drone:function(){
+                    setEstrategiaCamara(Estrategia.Drone)
+                }, 
+                barco:function(){
+                    setEstrategiaCamara(Estrategia.Barco)
+                    setInfoBarco(barco,nodoRioBarco)
+                }, 
+            };
+
+            function initWebGL(){
+
+                canvas = document.getElementById("my-canvas");  
+
+                try{
+                    gl = canvas.getContext("webgl");      
+
+                }catch(e){
+                    alert(  "Error: Your browser does not appear to support WebGL.");
+                }
+
+                if(gl) {
+
+                    setupWebGL();
+                    GUI(parametros);
+                    crearEscena();
+                    tick();   
+
+                }else{    
+                    alert(  "Error: Your browser does not appear to support WebGL.");
+                }
+
+            }
+
+            function crearEscena(){
+                generator = new Math.seedrandom('Sistemas Gráficos');
+                
+                nodoPadre = new Objeto3D();
+                nodoPadre.setPosicion(vec3.fromValues(0,0,0))
+                
+                // Creo el terreno
+                let terreno = new Terreno(0.1,0.01,gl)
+
+                terreno.setPosicion(vec3.fromValues(0,0,0))
+                nodoPadre.agregarHijo(terreno)
+             
+                
+                
+
+                // Creo la carretera
+                let carretera = new Carretera(parametros.puente.alturaAct)
+                carretera.setMaterial(new Phong(gl))
+                carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
+                carretera.setPosicion(vec3.fromValues(0,1.01,0))
+                nodoPadre.agregarHijo(carretera)
+          
+                
+                // Creo las 4 torres del puente 
+                let torres = []
+                for(let i=0; i<4; i++){
+                    let torre = new Torre(parametros.torres.alturaTorre)
+                    torre.setMaterial(new Phong(gl))
+                    torre.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+                    nodoPadre.agregarHijo(torre)
+                    torres.push(torre)
+                }
+                torres[0].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,2.25))
+                torres[1].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,-2.25))
+                torres[2].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,2.25))
+                torres[3].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,-2.25))
+                
+                // Creo todos arboles 
+                for(let i=0; i < randomToRange(20,35);i++){
+                    
+                    let arbol = randomToRange(0,2) < 0.5 ?  new Arbol(VarienteArbol.Pino):new Arbol()
+                    arbol.setMaterial(new Phong(gl))
+                    let x = (i % 2 != 0) ? randomToRange(-25,-45) : randomToRange(30,45)
+                    let z = randomToRange(-35,35)
+                    while( z < 5 &&  z > -5 )  z = randomToRange(-35,35)
+                    
+                    arbol.setPosicion(vec3.fromValues(x,-0.5,z))
+                    let escala = randomToRange(1,5)/10 +1
+                    arbol.setEscala(vec3.fromValues(escala,escala,escala))
+                    nodoPadre.agregarHijo(arbol)
+                }
+                
+                
+                // Creo el rio y barco con sus containers
+                nodoRioBarco = new Objeto3D()
+                nodoPadre.agregarHijo(nodoRioBarco)
+                nodoRioBarco.setPosicion(vec3.fromValues(0,parametros.rio.alturaAct,0))
+
+                let rio = new Plano(78.5,100)
+                rio.setMaterial(new Phong(gl))
+                rio.setColor(30/255,172/255,238/255)
+                nodoRioBarco.agregarHijo(rio)
+                rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
+
+                barco = new Barco()
+                barco.setMaterial(new Phong(gl))
+                barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
+                nodoRioBarco.agregarHijo(barco)
+                setInfoBarco(barco,nodoRioBarco)
+                
+                // Creo los tentidos a los lados del puentes.
+                let tendido = new Tendido(carretera,parametros)
+                tendido.setMaterial(new Phong(gl))
+                nodoPadre.agregarHijo(tendido)
+                tendido.setPosicion(vec3.fromValues(0,0,2.25))
+
+
+                let tendido2 = new Tendido(carretera,parametros)
+                tendido2.setMaterial(new Phong(gl))
+                nodoPadre.agregarHijo(tendido2)
+                tendido2.setPosicion(vec3.fromValues(0,0,-2.25))
+                
+                // SkyBox
+                var esfera = new Objeto3D()
+                esfera.setMaterial(new Textured(gl))
+                var buffersEsfera = crearGeometria("esfera",40,40)
+                esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2],buffersEsfera[3]) 
+                esfera.setEscala(vec3.fromValues(80,80,80))
+                nodoPadre.agregarHijo(esfera)
+                
+                
+            }
+
+            function setEstrategiaCamara(estrategia){
+                camara.setEstrategia(estrategia)
+            }
+
+            function setInfoBarco(barco,padreBarco){
+                camara.setBarcoInfo(barco,padreBarco)
+            }
+            function randomToRange(min, max){
+                return Math.floor(generator() * (max - min)) + min;
+            }
+
+            function setupWebGL(){
+                gl.enable(gl.DEPTH_TEST);
+                //set the clear color
+                gl.clearColor(0.1, 0.1, 0.2, 1.0);     
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     
+    
+                gl.viewport(0, 0, canvas.width, canvas.height);
+
+                // Matrix de Proyeccion Perspectiva
+                mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 450.0);
+                
+                mat4.identity(modelMatrix);
+                mat4.identity(viewMatrix);
+                mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, 20.0]);
+            }
+                
+            function drawScene(){
+                nodoPadre.dibujar(modelMatrix,gl,shaderProgram,viewMatrix,projMatrix,parametros.normal)
+            }
+
+            $("body").mousemove(function(event){camara.handler(event)});
+            $('body').mousedown(function(event){camara.handler(event)});
+            $('body').mouseup(function(event){camara.handler(event)});
+            $('body').on('mousewheel',function(event){camara.handler(event)});
+            $('body').on("keydown",function(event){camara.handler(event)})
+            
+            function animate(){
+                /*
+                if(posBarco <= -35){
+                    posBarco = 35
+                }
+                barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
+                */
+                mat4.identity(viewMatrix)
+                let view = camara.getViewParameters()
+                mat4.lookAt(viewMatrix, view.eye, view.center, view.up)
+
+            }
+            
+            function tick(){
+                requestAnimationFrame(tick);
+                drawScene();
+                animate();
+            }
+
+            $(document).ready(function(){
+                initWebGL();
+            })
+        </script>
+    </body>
+</html>
