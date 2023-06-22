@@ -1,6 +1,6 @@
 var mat4=glMatrix.mat4;
 
-export class Phong {
+export class Phong2 {
     constructor(gl){
       this.vertexShaderSource =   
       `precision highp float;
@@ -53,6 +53,7 @@ export class Phong {
       this.setMatrixUniforms(gl,viewMatrix,projMatrix,modelMatrix)
     }
 
+    
     setMatrixUniforms(gl,viewMatrix,projMatrix,modelMatrix){
                       
       var normalMatrix = mat4.create();

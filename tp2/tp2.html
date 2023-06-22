@@ -90,7 +90,8 @@
             import {Tendido} from './src/modelos/tendido.js'
             
             import {Textured} from './src/materiales/skybox.js'
-            import {Phong} from './src/materiales/shaderProgram.js'
+            import {Phong2} from './src/materiales/shaderProgram.js'
+            import {Phong} from './src/materiales/phong.js'
 
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
@@ -190,23 +191,23 @@
                 
                 nodoPadre = new Objeto3D();
                 nodoPadre.setPosicion(vec3.fromValues(0,0,0))
-                
+                /*
                 // Creo el terreno
                 let terreno = new Terreno(0.1,0.01,gl)
 
                 terreno.setPosicion(vec3.fromValues(0,0,0))
                 nodoPadre.agregarHijo(terreno)
-             
+               */
                 
                 
-
+                /*
                 // Creo la carretera
                 let carretera = new Carretera(parametros.puente.alturaAct)
                 carretera.setMaterial(new Phong(gl))
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
                 nodoPadre.agregarHijo(carretera)
-          
+                /*
                 
                 // Creo las 4 torres del puente 
                 let torres = []
@@ -266,7 +267,7 @@
                 tendido2.setMaterial(new Phong(gl))
                 nodoPadre.agregarHijo(tendido2)
                 tendido2.setPosicion(vec3.fromValues(0,0,-2.25))
-                
+                */
                 // SkyBox
                 var esfera = new Objeto3D()
                 esfera.setMaterial(new Textured(gl))
@@ -275,6 +276,21 @@
                 esfera.setEscala(vec3.fromValues(80,80,80))
                 nodoPadre.agregarHijo(esfera)
                 
+
+                var esfera1 = new Objeto3D()
+                esfera1.setMaterial(new Phong(gl))
+                var buffersEsfera = crearGeometria("esfera",40,40)
+                esfera1.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2],buffersEsfera[3]) 
+                esfera1.setEscala(vec3.fromValues(5,5,5))
+                nodoPadre.agregarHijo(esfera1)
+
+                var esfera2 = new Objeto3D()
+                esfera2.setMaterial(new Phong(gl))
+                var buffersEsfera = crearGeometria("esfera",40,40)
+                esfera2.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2],buffersEsfera[3]) 
+                //esfera2.setEscala(vec3.fromValues(1,1,1))
+                esfera2.setPosicion(vec3.fromValues(10,0,10))
+                nodoPadre.agregarHijo(esfera2)
                 
             }
 
@@ -306,7 +322,8 @@
             }
                 
             function drawScene(){
-                nodoPadre.dibujar(modelMatrix,gl,shaderProgram,viewMatrix,projMatrix,parametros.normal)
+                let view = camara.getViewParameters()
+                nodoPadre.dibujar(modelMatrix,gl,shaderProgram,viewMatrix,projMatrix,view.eye,parametros.normal)
             }
 
             $("body").mousemove(function(event){camara.handler(event)});

@@ -15,7 +15,7 @@ export class Carretera extends Modelo{
         this.setRecorrido(altura)
     }
 
-    dibujar(matPadre, gl,shaderProgram, viewMatrix, projMatrix, normal) {
+    dibujar(matPadre, gl,shaderProgram, viewMatrix, projMatrix,eyePos, normal) {
         if (this.buffers == null ){
             this.buffers = this.supBarrido.getBuffers(
                 this.getPerfil(this.stepPerfil),
@@ -43,7 +43,7 @@ export class Carretera extends Modelo{
                 this.buffers[2], // indexBuffer
             )
         }
-        super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,normal)
+        super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos,normal)
     }
     getRecorrido(step){
         var puntos = this.recorrido.getDiscretizacion(step)

@@ -2,7 +2,7 @@ import { Objeto3D } from '../util/objeto3D.js';
 import {Curva, Bases} from '../util/curva.js'
 import {CurvaGenerica} from '../util/curvaGenerica.js'
 import { SuperficieBarrido } from '../util/superficieBarrido.js';
-import {Phong} from '../materiales/shaderProgram.js'
+import {Phong2} from '../materiales/shaderProgram.js'
 
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
@@ -23,7 +23,7 @@ export class Terreno{
         ]
         this.recorrido = null
         this.objeto3d = new Objeto3D()    
-        this.objeto3d.setMaterial(new Phong(gl))
+        this.objeto3d.setMaterial(new Phong2(gl))
 
         this.objeto3d.setColor(100/255,187/255,109/255)
 

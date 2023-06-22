@@ -34,7 +34,7 @@ export class Objeto3D {
         mat4.scale(this.matrizModelado,this.matrizModelado,this.escala)
     }
   
-    dibujar(matPadre, gl,shaderProgram,viewMatrix,projMatrix, normal) {
+    dibujar(matPadre, gl,shaderProgram,viewMatrix,projMatrix,eyePos, normal) {
         // Método público para dibujar el objeto en pantalla, se recibe la matriz del padre
         // En este método se llamaría a las funciones pertinentes de WebGL para dibujar el objeto
         // aplicando la matriz de transformación final (matPadre * matrizModelado)
@@ -44,7 +44,7 @@ export class Objeto3D {
 
 
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer && this.material){
-            this.material.setUpConfing(gl,viewMatrix,projMatrix,m)
+            this.material.setUpConfing(gl,viewMatrix,projMatrix,m,eyePos)
             var shaderProgram = this.material.getShaderProgram()
 
             const trianglesVerticeBuffer = gl.createBuffer();
@@ -73,19 +73,16 @@ export class Objeto3D {
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
 
-
-            const trianglesUVBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uvBuffer), gl.STATIC_DRAW);
-
-            const vertexUVAttribute = gl.getAttribLocation(shaderProgram, "a_texcoord");
-            gl.enableVertexAttribArray(vertexUVAttribute);
-            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
-            gl.vertexAttribPointer(vertexUVAttribute, 2, gl.FLOAT, false, 0, 0);
-            
- 
-            const vcolor  = gl.getUniformLocation(shaderProgram, "vColor");
-            gl.uniform3f(vcolor, this.color[0],this.color[1],this.color[2]);
+            if(this.uvBuffer){
+                const trianglesUVBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uvBuffer), gl.STATIC_DRAW);
+    
+                const vertexUVAttribute = gl.getAttribLocation(shaderProgram, "a_texcoord");
+                gl.enableVertexAttribArray(vertexUVAttribute);
+                gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
+                gl.vertexAttribPointer(vertexUVAttribute, 2, gl.FLOAT, false, 0, 0);
+            }
 
             gl.drawElements( gl.TRIANGLE_STRIP, trianglesIndexBuffer.number_vertex_point, gl.UNSIGNED_SHORT, 0);    
             
@@ -94,7 +91,7 @@ export class Objeto3D {
             }
         }
 
-        for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl,shaderProgram,viewMatrix,projMatrix, normal);
+        for (var i=0;i<this.hijos.length;i++) this.hijos[i].dibujar(m,gl,shaderProgram,viewMatrix,projMatrix,eyePos, normal);
     }
 
     dibujarNormales(gl, shaderProgram){

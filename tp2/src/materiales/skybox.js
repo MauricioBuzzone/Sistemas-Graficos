@@ -1,4 +1,4 @@
-import { Phong } from "./shaderProgram.js"
+import { Phong2 } from "./shaderProgram.js"
 
 var texture_file = './maps/sky_lightblue.jpg'
 var vertexShaderSource = 
@@ -42,7 +42,7 @@ void main() {
   gl_FragColor = vec4(color,1.0);
 }` 
 
-export class Textured extends Phong{
+export class Textured extends Phong2{
   constructor(gl){
     super(gl)
     this.gl = gl
@@ -54,7 +54,6 @@ export class Textured extends Phong{
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
       // Configura los parámetros de la textura
-      
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

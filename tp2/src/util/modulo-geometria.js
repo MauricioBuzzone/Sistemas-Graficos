@@ -88,7 +88,7 @@ function Esfera(radio){
         var x = Math.sin(u*Math.PI)* Math.cos(v*2*Math.PI)
         var z = Math.sin(u*Math.PI)* Math.sin(v*2*Math.PI)
         var y = Math.cos(u*Math.PI)
-        return [-x,-y,-z]
+        return [x,y,z]
     }
 
     this.getCoordenadasTextura = function(u,v){
