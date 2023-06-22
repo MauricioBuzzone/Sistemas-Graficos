@@ -2,7 +2,7 @@ import { Objeto3D } from "../util/objeto3D.js";
 import { Punto } from '../util/punto.js'
 import { Curva, Bases} from "../util/curva.js"
 import { CurvaGenerica } from "../util/curvaGenerica.js"
-
+import {PhongConTextura} from '../materiales/phongConTextura.js'
 import { Cilindro } from './cilindro.js'
 
 var vec3=glMatrix.vec3;
@@ -55,6 +55,8 @@ export class Tendido extends Objeto3D{
         ])
         recorridoCable.setBiNormal(vec3.fromValues(-1,0,0))
         this.cable = new Cilindro()
+
+
         this.cable.setRecorrido(recorridoCable)
         this.cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
         this.cable.setColor(240/255,60/255,60/255)

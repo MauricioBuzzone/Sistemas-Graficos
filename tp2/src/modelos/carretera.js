@@ -1,54 +1,53 @@
 import {Curva, Bases} from '../util/curva.js'
 import {CurvaGenerica} from '../util/curvaGenerica.js'
-import { Modelo } from './modelo.js';
+import { Objeto3D } from '../util/objeto3D.js';
+import {SuperficieBarrido} from '../util/superficieBarrido.js'
+import {PhongConTextura} from '../materiales/phongConTextura.js'
 
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
-export class Carretera extends Modelo{ 
-    constructor(altura){
+export class Carretera extends Objeto3D{ 
+    constructor(gl,altura){
         super()
-        this.stepPerfil = 0.1
-        this.stepRecorrido = 0.1
-        this.setColor(183/255,187/255,186/255)
-        this.setPerfil()
-        this.setRecorrido(altura)
-    }
+        let stepPerfil = 0.1
+        let stepRecorrido = 0.1
+        let supBarrido = new SuperficieBarrido()
 
-    dibujar(matPadre, gl,shaderProgram, viewMatrix, projMatrix,eyePos, normal) {
-        if (this.buffers == null ){
-            this.buffers = this.supBarrido.getBuffers(
-                this.getPerfil(this.stepPerfil),
-                this.getRecorrido(this.stepRecorrido)
-            )
-            let cantCurvas = this.perfil.curvas.length
-            let disc = 1/this.stepPerfil +1
-            let sizeBuffer = this.buffers[1].length
-            
-            for(let i=0; i< cantCurvas*disc*3*2 ;i+=3){
-                this.buffers[1][i] = 0
-                this.buffers[1][i+1] = 0
-                this.buffers[1][i+2] = -1
+        this.vereda = new Objeto3D()
+        let perfilVereda = this.perfilVereda()
+        let recorrido = this.recorrido(altura)
+        let veredaBuffers = supBarrido.getBuffers(
+                                perfilVereda.getDiscretizacion(stepPerfil),
+                                this.getRecorrido(recorrido,stepRecorrido),1,10)
+        this.vereda.setGeometria(
+            veredaBuffers[0], // positionBuffer
+            veredaBuffers[1], // normalBuffer
+            veredaBuffers[2], // indexBuffer
+            veredaBuffers[3], // uvBuffer
+        )
+        this.vereda.setMaterial(new PhongConTextura(gl,'./maps/concrete_wall_008_diff_1k.jpg'))
+        this.agregarHijo(this.vereda)
 
 
-                this.buffers[1][(sizeBuffer -1) - i] = 1
-                this.buffers[1][(sizeBuffer -1) - i -1] = 0
-                this.buffers[1][(sizeBuffer -1) - i -2] = 0
+        this.ruta = new Objeto3D()
+        let perfilRuta = this.perfilRuta()
+        let rutaBuffers = supBarrido.getBuffers(
+                                perfilRuta.getDiscretizacion(1),
+                                this.getRecorrido(recorrido,stepRecorrido),1,10)
+        this.ruta.setGeometria(
+            rutaBuffers[0], // positionBuffer
+            rutaBuffers[1], // normalBuffer
+            rutaBuffers[2], // indexBuffer
+            rutaBuffers[3], // uvBuffer
+        )
+        this.ruta.setMaterial(new PhongConTextura(gl,'./maps/tramo-doblemarilla.jpg'))
+        this.ruta.setPosicion(vec3.fromValues(0,-0.19,0))
+        this.agregarHijo(this.ruta)
 
-            }
-            
-            this.setGeometria(
-                this.buffers[0], // positionBuffer
-                this.buffers[1], // normalBuffer
-                this.buffers[2], // indexBuffer
-            )
-        }
-        super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos,normal)
-    }
-    getRecorrido(step){
-        var puntos = this.recorrido.getDiscretizacion(step)
-        var recorrido = []
-        
+       
+        var puntos = recorrido.getDiscretizacion(stepRecorrido)
+        var recorridoTapa = []
         let inicio = puntos[0].getCoords()[2]
         let fin = puntos[puntos.length-1].getCoords()[2]
 
@@ -59,7 +58,7 @@ export class Carretera extends Modelo{
             0,0,0,1,
         )
         mat4.transpose(tapa1,tapa1)
-        recorrido.push(tapa1)
+        recorridoTapa.push(tapa1)
  
         tapa1 = mat4.fromValues(
             -1,0,0,0,
@@ -68,8 +67,58 @@ export class Carretera extends Modelo{
             0,0,0,1,
         )
         mat4.transpose(tapa1,tapa1)
-        recorrido.push(tapa1)
-       
+        recorridoTapa.push(tapa1)
+
+        this.tapa1 = new Objeto3D()
+        let tapaBuffers = supBarrido.getBuffersTapas(
+            perfilVereda.getDiscretizacion(stepPerfil),
+            recorridoTapa,2,2,1,0,-1)
+        this.tapa1.setGeometria(
+            tapaBuffers[0], // positionBuffer
+            tapaBuffers[1], // normalBuffer
+            tapaBuffers[2], // indexBuffer
+            tapaBuffers[3], // uvBuffer
+        )
+        this.tapa1.setMaterial(new PhongConTextura(gl,'./maps/tramo-doblemarilla.jpg'))
+        this.agregarHijo(this.tapa1)
+
+
+        recorridoTapa = []
+        let tapa2 = mat4.fromValues(
+            -1,0,0,0,
+            0,1,0,0,
+            0,0,1,fin,
+            0,0,0,1,
+        )
+        mat4.transpose(tapa2,tapa2)
+        recorridoTapa.push(tapa2)
+
+        tapa2 = mat4.fromValues(
+            0,0,0,0,
+            0,0,0,-1,
+            0,0,0,fin,
+            0,0,0,1,
+        )
+        mat4.transpose(tapa2,tapa2)
+        recorridoTapa.push(tapa2)
+
+        this.tapa2 = new Objeto3D()
+        tapaBuffers = supBarrido.getBuffersTapas(
+            perfilVereda.getDiscretizacion(stepPerfil),
+            recorridoTapa,1,1,-1)
+        this.tapa2.setGeometria(
+            tapaBuffers[0], // positionBuffer
+            tapaBuffers[1], // normalBuffer
+            tapaBuffers[2], // indexBuffer
+            tapaBuffers[3], // uvBuffer
+        )
+        this.tapa2.setMaterial(new PhongConTextura(gl,'./maps/tramo-doblemarilla.jpg'))
+        this.agregarHijo(this.tapa2)
+    }
+
+    getRecorrido(recorrido,step){
+        var puntos = recorrido.getDiscretizacion(step)
+        var recorrido = []
         for(var i=0; i< puntos.length; i++){
 
             var biNormal = puntos[i].getBiNormal()
@@ -85,29 +134,10 @@ export class Carretera extends Modelo{
             
             recorrido.push(matrizLvli)
         }
-        
-        let tapa2 = mat4.fromValues(
-            -1,0,0,0,
-            0,1,0,0,
-            0,0,1,fin,
-            0,0,0,1,
-        )
-        mat4.transpose(tapa2,tapa2)
-        recorrido.push(tapa2)
-
-        tapa2 = mat4.fromValues(
-            0,0,0,0,
-            0,0,0,-1,
-            0,0,0,fin,
-            0,0,0,1,
-        )
-        mat4.transpose(tapa2,tapa2)
-        recorrido.push(tapa2)
-        
         return recorrido
     }
 
-    setRecorrido(altura){
+    recorrido(altura){
         let puntosDeControl = [
             vec3.fromValues(0,0,-50),  
             vec3.fromValues(0,0,-37.5),
@@ -118,7 +148,7 @@ export class Carretera extends Modelo{
             vec3.fromValues(0,0,50), 
         ]
 
-        this.recorrido = new CurvaGenerica([
+        var recorrido = new CurvaGenerica([
             new Curva(Bases.Bezier2,[
                 puntosDeControl[0],
                 puntosDeControl[1],
@@ -135,9 +165,26 @@ export class Carretera extends Modelo{
                 puntosDeControl[6],
             ])
         ])
-        this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
+        recorrido.setBiNormal(vec3.fromValues(-1,0,0))
+
+        return recorrido
     }
-    setPerfil(){
+
+    perfilRuta(){
+        let puntosDeControl = [
+            vec3.fromValues(2,0,0),  
+            vec3.fromValues(0,0,0),
+            vec3.fromValues(-2,0,0), 
+        ]
+        return new CurvaGenerica([
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[0],
+                puntosDeControl[1],
+                puntosDeControl[2],
+            ])
+        ])
+    }
+    perfilVereda(){
         let puntosDeControl = [
             vec3.fromValues(-2.5,-1,0),
             vec3.fromValues(0,-1,0),
@@ -159,7 +206,7 @@ export class Carretera extends Modelo{
             vec3.fromValues(-2.5,0,0), 
             vec3.fromValues(-2.5,-1,0), 
         ]
-        this.perfil = new CurvaGenerica([
+        return new CurvaGenerica([
             new Curva(Bases.Bezier2,[
                 puntosDeControl[0],
                 puntosDeControl[1],

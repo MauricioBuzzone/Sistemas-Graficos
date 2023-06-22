@@ -78,7 +78,7 @@ export class Objeto3D {
                 gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uvBuffer), gl.STATIC_DRAW);
     
-                const vertexUVAttribute = gl.getAttribLocation(shaderProgram, "a_texcoord");
+                const vertexUVAttribute = gl.getAttribLocation(shaderProgram, "aTexcoord");
                 gl.enableVertexAttribArray(vertexUVAttribute);
                 gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
                 gl.vertexAttribPointer(vertexUVAttribute, 2, gl.FLOAT, false, 0, 0);

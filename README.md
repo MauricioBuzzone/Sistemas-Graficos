@@ -13,3 +13,4 @@ Demos, tareas y tps de 86.43 / 66.71 Sistemas Gráficos
 ### TPs:
 
 * [TP1](https:///mauriciobuzzone.github.io/Sistemas-Graficos/tp1/tp1.html)
+* [TP2](https:///mauriciobuzzone.github.io/Sistemas-Graficos/tp2/tp2.html)

@@ -89,9 +89,10 @@
             import {Arbol, VarienteArbol} from './src/modelos/arbol.js'
             import {Tendido} from './src/modelos/tendido.js'
             
-            import {Textured} from './src/materiales/skybox.js'
+            import {Textured,Textured2} from './src/materiales/skybox.js'
             import {Phong2} from './src/materiales/shaderProgram.js'
             import {Phong} from './src/materiales/phong.js'
+            import {PhongConTextura} from './src/materiales/phongConTextura.js'
 
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
@@ -194,26 +195,25 @@
                 /*
                 // Creo el terreno
                 let terreno = new Terreno(0.1,0.01,gl)
-
                 terreno.setPosicion(vec3.fromValues(0,0,0))
                 nodoPadre.agregarHijo(terreno)
                */
                 
                 
-                /*
+                
                 // Creo la carretera
-                let carretera = new Carretera(parametros.puente.alturaAct)
-                carretera.setMaterial(new Phong(gl))
+                let carretera = new Carretera(gl,parametros.puente.alturaAct)
+                carretera.setMaterial(new PhongConTextura(gl,'./maps/concrete_wall_008_diff_1k.jpg'))
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
                 nodoPadre.agregarHijo(carretera)
+               
                 /*
-                
                 // Creo las 4 torres del puente 
                 let torres = []
                 for(let i=0; i<4; i++){
                     let torre = new Torre(parametros.torres.alturaTorre)
-                    torre.setMaterial(new Phong(gl))
+                    torre.setMaterial(new PhongConTextura(gl,'./maps/oxido.jpg'))
                     torre.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
                     nodoPadre.agregarHijo(torre)
                     torres.push(torre)
@@ -222,7 +222,7 @@
                 torres[1].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,-2.25))
                 torres[2].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,2.25))
                 torres[3].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,-2.25))
-                
+            
                 // Creo todos arboles 
                 for(let i=0; i < randomToRange(20,35);i++){
                     
@@ -255,10 +255,11 @@
                 barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
                 nodoRioBarco.agregarHijo(barco)
                 setInfoBarco(barco,nodoRioBarco)
-                
+        
                 // Creo los tentidos a los lados del puentes.
                 let tendido = new Tendido(carretera,parametros)
                 tendido.setMaterial(new Phong(gl))
+
                 nodoPadre.agregarHijo(tendido)
                 tendido.setPosicion(vec3.fromValues(0,0,2.25))
 
@@ -270,13 +271,13 @@
                 */
                 // SkyBox
                 var esfera = new Objeto3D()
-                esfera.setMaterial(new Textured(gl))
+                esfera.setMaterial(new Textured(gl,'./maps/sky_lightblue.jpg'))
                 var buffersEsfera = crearGeometria("esfera",40,40)
                 esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2],buffersEsfera[3]) 
                 esfera.setEscala(vec3.fromValues(80,80,80))
                 nodoPadre.agregarHijo(esfera)
                 
-
+                /*
                 var esfera1 = new Objeto3D()
                 esfera1.setMaterial(new Phong(gl))
                 var buffersEsfera = crearGeometria("esfera",40,40)
@@ -291,7 +292,7 @@
                 //esfera2.setEscala(vec3.fromValues(1,1,1))
                 esfera2.setPosicion(vec3.fromValues(10,0,10))
                 nodoPadre.agregarHijo(esfera2)
-                
+                */
             }
 
             function setEstrategiaCamara(estrategia){

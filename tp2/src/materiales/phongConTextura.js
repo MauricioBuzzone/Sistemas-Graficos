@@ -1,3 +1,4 @@
+import { Phong } from "./phong.js";
 var mat4=glMatrix.mat4;
 
 var vertexShaderSource = 
@@ -5,6 +6,7 @@ var vertexShaderSource =
 
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
+    attribute vec2 aTexcoord;
 
     uniform mat4 modelMatrix;            
     uniform mat4 viewMatrix;
@@ -13,13 +15,14 @@ var vertexShaderSource =
 
     varying vec3 vPosWorld;
     varying vec3 vNormal;
-
+    varying vec2 vTexcoord;
     void main() {
 
         gl_Position = projMatrix * viewMatrix * modelMatrix  * vec4(aVertexPosition, 1.0);
 
         vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz;    //la posicion en coordenadas de mundo
         vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz;       //la normal en coordenadas de mundo       
+        vTexcoord = aTexcoord;
     }
 `
 
@@ -28,6 +31,9 @@ var fragmentShaderSource =
 
     varying vec3 vPosWorld;
     varying vec3 vNormal;
+    
+    varying highp vec2 vTexcoord;
+    uniform sampler2D u_texture;
 
     uniform vec3 u_eyePos;
     uniform vec3 u_lightPos;
@@ -56,7 +62,9 @@ var fragmentShaderSource =
 
         // Compute the final color
         vec3 ambient = u_ambientColor;
-        vec3 diffuseColor = u_diffuseColor * diffuse * u_lightColor;
+
+        vec3 color = texture2D(u_texture, vTexcoord).xyz;
+        vec3 diffuseColor = color * diffuse * u_lightColor;
         vec3 specularColor = u_specularColor * specular * u_lightColor;
 
         vec3 finalColor = ambient + diffuseColor + specularColor ;
@@ -66,17 +74,30 @@ var fragmentShaderSource =
 ` 
 
 
-export class Phong {
-    constructor(gl){
-        this.gl = gl
-        this.shaderProgram = this.initShaders(gl)
+export class PhongConTextura extends Phong{
+    constructor(gl,texture_file){
+        super(gl)
 
-        this.lightPos = [0,20,0]
-        this.lightColor = [1,1,1]
-        this.ambientColor = [0.25,0.25,0.25]
-        this.diffuseColor = [1,0.0,0.0]
-        this.specularColor = [1,1,1]
-        this.shininess = 36
+        this.image =  new Image();
+        this.image.onload = () => {
+          this.texture = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    
+          // Configura los parámetros de la textura
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    
+          // Carga la imagen en la textura
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
+          
+          // Limpia los recursos
+          gl.bindTexture(gl.TEXTURE_2D, null);
+    
+        };
+        this.image.src = texture_file;
+        this.initShaders(gl)
     }
 
     setUpConfing(gl,viewMatrix,projMatrix,modelMatrix,eyePos){
@@ -85,65 +106,22 @@ export class Phong {
         this.setPhongComponent(eyePos)
     }
 
-    setConfig(lightPos,lightColor,ambientColor,diffuseColor,specularColor,shininess){
-        this.lightPos = lightPos
-        this.lightColor = lightColor
-        this.ambientColor = ambientColor
-        this.diffuseColor = diffuseColor
-        this.specularColor = specularColor
-        this.shininess = shininess
-    }
-
-    getShaderProgram(){
-        return this.shaderProgram
-    }
 
     setPhongComponent(eyePos){
+        super.setPhongComponent(eyePos)
         var gl = this.gl
-        var shaderProgram = this.shaderProgram
 
-        const lightPos  = gl.getUniformLocation(shaderProgram, "u_lightPos");
-        gl.uniform3f(lightPos, this.lightPos[0],this.lightPos[1],this.lightPos[2]);
+        var textureLocation = gl.getUniformLocation(this.shaderProgram, 'u_texture');
 
-        const lightColor  = gl.getUniformLocation(shaderProgram, "u_lightColor");
-        gl.uniform3f(lightColor, this.lightColor[0],this.lightColor[1],this.lightColor[2]);
+        // Activa la textura en una unidad de textura específica (por ejemplo, unidad 0)
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-        const ambientColor  = gl.getUniformLocation(shaderProgram, "u_ambientColor");
-        gl.uniform3f(ambientColor, this.ambientColor[0],this.ambientColor[1],this.ambientColor[2]);
-
-        const diffuseColor  = gl.getUniformLocation(shaderProgram, "u_diffuseColor");
-        gl.uniform3f(diffuseColor, this.diffuseColor[0],this.diffuseColor[1],this.diffuseColor[2]);
-
-        const specularColor  = gl.getUniformLocation(shaderProgram, "u_specularColor");
-        gl.uniform3f(specularColor, this.specularColor[0],this.specularColor[1],this.specularColor[2]);
-
-        const shininess  = gl.getUniformLocation(shaderProgram, "u_shininess");
-        gl.uniform1f(shininess, this.shininess);
-
-        const eyePosition  = gl.getUniformLocation(shaderProgram, "u_eyePos");
-        gl.uniform3f(eyePosition, eyePos[0],eyePos[1],eyePos[2]);
+        // Asigna la unidad de textura al uniforme del fragment shader
+        gl.uniform1i(textureLocation, 0);
     }
 
-    setMatrixUniforms(gl,viewMatrix,projMatrix,modelMatrix){
-                      
-        var normalMatrix = mat4.create();
-        mat4.invert(normalMatrix,modelMatrix)
-        mat4.transpose(normalMatrix,normalMatrix)
-  
-        var modelMatrixUniform = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
-        var normalMatrixUniform  = gl.getUniformLocation(this.shaderProgram, "normalMatrix");
-        var viewMatrixUniform  = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
-        var projMatrixUniform  = gl.getUniformLocation(this.shaderProgram, "projMatrix");
-  
-        gl.uniformMatrix4fv(modelMatrixUniform, false,modelMatrix);
-        gl.uniformMatrix4fv(normalMatrixUniform, false, normalMatrix);
-        gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
-        gl.uniformMatrix4fv(projMatrixUniform, false, projMatrix);
-      }
-
-
     initShaders(gl) {
-
         var vertexShader= getShader(gl, vertexShaderSource,"vertex");
         var fragmentShader = getShader(gl, fragmentShaderSource,"fragment");
       
@@ -157,10 +135,10 @@ export class Phong {
         }
       
         return shaderProgram
-      }
-  }
-  
-  function getShader(gl,code,type) {
+    }
+}
+
+function getShader(gl,code,type) {
 
     var shader;
   
