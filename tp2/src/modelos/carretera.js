@@ -13,6 +13,7 @@ export class Carretera extends Objeto3D{
         let stepPerfil = 0.1
         let stepRecorrido = 0.1
         let supBarrido = new SuperficieBarrido()
+        this.recorridoDisc = this.recorrido(altura).getDiscretizacion(stepPerfil)
 
         this.vereda = new Objeto3D()
         let perfilVereda = this.perfilVereda()

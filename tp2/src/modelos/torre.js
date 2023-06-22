@@ -16,6 +16,22 @@ export class Torre extends Modelo{
         this.setPerfil(altura)
         this.setRecorrido()
     }
+    dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos, normal) {
+        if (this.buffers == null ){
+            this.buffers = this.supBarrido.getBuffers(
+                this.getPerfil(this.stepPerfil),
+                this.getRecorrido(this.stepRecorrido),15,1
+            )
+
+            this.setGeometria(
+                this.buffers[0], // positionBuffer
+                this.buffers[1], // normalBuffer
+                this.buffers[2], // indexBuffer
+                this.buffers[3], // uvBuffer
+            )
+        }
+        super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos, normal)
+    }
 
     setRecorrido(){
         let puntosDeControl = [
@@ -83,6 +99,11 @@ export class Torre extends Modelo{
                 puntosDeControl[1],
                 puntosDeControl[2],
             ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[2],
+                puntosDeControl[2],
+                puntosDeControl[3],
+            ]),
             new Curva(Bases.Bezier3,[
                 puntosDeControl[3],
                 puntosDeControl[4],
@@ -122,6 +143,11 @@ export class Torre extends Modelo{
                 puntosDeControl[21],
                 puntosDeControl[22],
                 puntosDeControl[23],
+            ]),
+            new Curva(Bases.Bezier2,[
+                puntosDeControl[23],
+                puntosDeControl[23],
+                puntosDeControl[24],
             ]),
             new Curva(Bases.Bezier2,[
                 puntosDeControl[24],

@@ -25,6 +25,7 @@ export class Modelo extends Objeto3D{
                 this.buffers[0], // positionBuffer
                 this.buffers[1], // normalBuffer
                 this.buffers[2], // indexBuffer
+                this.buffers[3]  // uvBuffer
             )
         }
         super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos, normal)

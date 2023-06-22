@@ -3,16 +3,17 @@ import { Punto } from '../util/punto.js'
 import { Curva, Bases} from "../util/curva.js"
 import { CurvaGenerica } from "../util/curvaGenerica.js"
 import {PhongConTextura} from '../materiales/phongConTextura.js'
+import {Phong} from '../materiales/phong.js'
 import { Cilindro } from './cilindro.js'
 
 var vec3=glMatrix.vec3;
 export class Tendido extends Objeto3D{
-    constructor(carretera, parametros){
+    constructor(carretera, parametros,gl){
         super()
 
         
 
-        let camino = carretera.getRecorridoPuntos(0.1)
+        let camino = carretera.recorridoDisc
         let inicio = camino[12].getCoords()
         let fin = camino[20].getCoords()
 
@@ -60,6 +61,10 @@ export class Tendido extends Objeto3D{
         this.cable.setRecorrido(recorridoCable)
         this.cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
         this.cable.setColor(240/255,60/255,60/255)
+        let material = new PhongConTextura(gl,'./maps/metal_wire.jpg')
+        material.setConfig([20,40,20],[0.75,0.75,0.75],[0.25,0.25,0.25],[1,0.0,0.0], [1,1,1],16)
+        this.cable.setMaterial(material)
+
         super.agregarHijo(this.cable)
 
         let puente = new Curva(Bases.Bezier2,[
@@ -72,6 +77,9 @@ export class Tendido extends Objeto3D{
         let cantTensores = Math.floor((fin[2] - inicio[2])/parametros.tensores.separacionTensores)
         let step = 1/(cantTensores)
         this.tensores = []
+
+        let materialTensor = new Phong(gl)
+        materialTensor.setConfig([20,40,20],[0.0,0.0,0.0],[0.25,0.25,0.25],[1,0.0,0.0], [1,1,1],16)
         for(let i=0; i<1;i+=step){
 
             let tope = recorridoCable.getPunto(i*4).getCoords()
@@ -79,6 +87,8 @@ export class Tendido extends Objeto3D{
             let piso = puente.getPunto(u).getCoords()
 
             let tensor = new Cilindro()
+            tensor.setMaterial(materialTensor)
+            
             this.tensores.push(tensor)
             tensor.setRotacion([-Math.PI/2,[1,0,0]])
             tensor.setPosicion(vec3.fromValues(piso[2],piso[1],0))

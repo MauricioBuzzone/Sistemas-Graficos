@@ -184,7 +184,6 @@ export class SuperficieBarrido {
     }
     Ucenter = Ucenter/sizePoligono
     Vcenter = Vcenter/sizePoligono
-    console.log(Vmax,Vmin,Umax,Umin,Ucenter,Vcenter)
 
     if (normal == 1){
       for (let j = 0; j < sizePoligono; j++) {
