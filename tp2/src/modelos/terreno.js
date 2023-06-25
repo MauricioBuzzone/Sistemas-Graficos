@@ -2,8 +2,8 @@ import { Objeto3D } from '../util/objeto3D.js';
 import {Curva, Bases} from '../util/curva.js'
 import {CurvaGenerica} from '../util/curvaGenerica.js'
 import { SuperficieBarrido } from '../util/superficieBarrido.js';
-import {Phong2} from '../materiales/shaderProgram.js'
-
+import {PhongConTextura} from '../materiales/phongConTextura.js'
+import {PhongTerreno} from '../materiales/terreno.js'
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
@@ -23,7 +23,7 @@ export class Terreno{
         ]
         this.recorrido = null
         this.objeto3d = new Objeto3D()    
-        this.objeto3d.setMaterial(new Phong2(gl))
+        this.objeto3d.setMaterial(new PhongTerreno(gl))
 
         this.objeto3d.setColor(100/255,187/255,109/255)
 
@@ -73,6 +73,8 @@ export class Terreno{
                     ])
                 )
             }
+
+            
             let discrtizacionPerfil = curvalvli.getDiscretizacion(perfilStep) 
             let supBarrido = new SuperficieBarrido(discrtizacionPerfil,[matrizlvl[i]])
             let posBuf = supBarrido.getPositionBuffer()
@@ -96,11 +98,22 @@ export class Terreno{
         let supBarrido = new SuperficieBarrido(discrtizacionPerfil,matrizlvl)
         indexBuffer = supBarrido.getIndexBuffer()
 
+        let uvBuffer = []
+        for(let i=0; i < positionBuffer.length; i+=3){
+
+            let u = (positionBuffer[i] - 50)/100 + 1
+            let v = (positionBuffer[i+2] - 40)/80 + 1
+
+            uvBuffer.push(u)
+            uvBuffer.push(v)
+        }
+        //console.log(uvBuffer)
 
         this.objeto3d.setGeometria(
             positionBuffer,
             normalBuffer,
             indexBuffer,
+            uvBuffer
         )
     }
 

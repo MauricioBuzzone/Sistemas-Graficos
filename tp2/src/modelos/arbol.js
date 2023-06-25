@@ -1,6 +1,7 @@
 import { Objeto3D } from "../util/objeto3D.js";
 import { Cilindro } from "./cilindro.js";
 import { CopaArbol } from "./copaArbol.js";
+import { Tensor } from "./tensor.js";
 
 var vec3=glMatrix.vec3;
 
@@ -13,7 +14,7 @@ export class Arbol extends Objeto3D{
     constructor(variante = VarienteArbol.Default){
         super()
 
-        this.tronco = new Cilindro()
+        this.tronco = new Tensor()
         this.tronco.setRotacion([-Math.PI/2,vec3.fromValues(1,0,0)])
         this.tronco.setEscala(vec3.fromValues(2,2,2))
         this.tronco.setPosicion(vec3.fromValues(0,0,0))
@@ -28,8 +29,8 @@ export class Arbol extends Objeto3D{
         super.agregarHijo(this.copa)
     }
 
-    setMaterial(material){
-        this.tronco.setMaterial(material)
-        this.copa.setMaterial(material)
+    setMaterial(materialTronco,materialhojas){
+        this.tronco.setMaterial(materialTronco)
+        this.copa.setMaterial(materialhojas)
     }
 }

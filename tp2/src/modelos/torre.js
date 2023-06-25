@@ -13,6 +13,8 @@ export class Torre extends Modelo{
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
         this.setColor(240/255,60/255,60/255)
+        this.uFactor = 20
+        this.vFactor = 2
         this.setPerfil(altura)
         this.setRecorrido()
     }
@@ -20,15 +22,17 @@ export class Torre extends Modelo{
         if (this.buffers == null ){
             this.buffers = this.supBarrido.getBuffers(
                 this.getPerfil(this.stepPerfil),
-                this.getRecorrido(this.stepRecorrido),15,1
+                this.getRecorrido(this.stepRecorrido),
+                this.uFactor,
+                this.vFactor
             )
-
             this.setGeometria(
                 this.buffers[0], // positionBuffer
                 this.buffers[1], // normalBuffer
                 this.buffers[2], // indexBuffer
                 this.buffers[3], // uvBuffer
             )
+
         }
         super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos, normal)
     }

@@ -11,6 +11,8 @@ export class Modelo extends Objeto3D{
         this.buffers = null
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
+        this.uFactor = 10
+        this.vFactor = 10
         this.supBarrido = new SuperficieBarrido()
     }
 
@@ -18,14 +20,18 @@ export class Modelo extends Objeto3D{
         if (this.buffers == null ){
             this.buffers = this.supBarrido.getBuffers(
                 this.getPerfil(this.stepPerfil),
-                this.getRecorrido(this.stepRecorrido)
+                this.getRecorrido(this.stepRecorrido),
+                this.uFactor,
+                this.vFactor
             )
 
             this.setGeometria(
                 this.buffers[0], // positionBuffer
                 this.buffers[1], // normalBuffer
                 this.buffers[2], // indexBuffer
-                this.buffers[3]  // uvBuffer
+                this.buffers[3], // uvBuffer
+                this.buffers[4], // TangBuffer
+                this.buffers[5]  // BinBuffer
             )
         }
         super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix,eyePos, normal)

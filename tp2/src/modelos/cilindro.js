@@ -11,8 +11,8 @@ export class Cilindro extends Modelo{
         super()
         this.stepPerfil = 0.1
         this.stepRecorrido = 0.1
-
-    
+        this.uFactor= 1
+        this.vFactor =20
         this.setPerfil()
         this.setRecorridoDef()
     }
@@ -75,5 +75,9 @@ export class Cilindro extends Modelo{
     }
     setRecorrido(recorrido){
         this.recorrido = recorrido
+    }
+
+    getRecorridoDics(){
+        return this.recorrido
     }
 }

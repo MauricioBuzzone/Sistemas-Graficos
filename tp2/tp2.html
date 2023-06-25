@@ -93,6 +93,7 @@
             import {Phong2} from './src/materiales/shaderProgram.js'
             import {Phong} from './src/materiales/phong.js'
             import {PhongConTextura} from './src/materiales/phongConTextura.js'
+            import {PhongConNormalMap} from './src/materiales/phongConNormalMap.js'
 
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
@@ -192,25 +193,23 @@
                 
                 nodoPadre = new Objeto3D();
                 nodoPadre.setPosicion(vec3.fromValues(0,0,0))
-                /*
+                
+                
                 // Creo el terreno
                 let terreno = new Terreno(0.1,0.01,gl)
                 terreno.setPosicion(vec3.fromValues(0,0,0))
                 nodoPadre.agregarHijo(terreno)
-               */ 
                 
                 
                 // Creo la carretera
                 let carretera = new Carretera(gl,parametros.puente.alturaAct)
-                carretera.setMaterial(new PhongConTextura(gl,'./maps/concrete_wall_008_diff_1k.jpg'))
                 carretera.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
                 carretera.setPosicion(vec3.fromValues(0,1.01,0))
                 nodoPadre.agregarHijo(carretera)
                
                 
                 // Creo las 4 torres del puente 
-
-                let materialTorre = new PhongConTextura(gl,'./maps/oxido.jpg')
+                let materialTorre =  new PhongConNormalMap(gl,'./maps/oxido.jpg','./maps/oxido-normal map.jpg')
                 materialTorre.setConfig([20,40,20],[1,1,1],[0.25,0.25,0.25],[0.5,0.5,0.5], [1,1,1],16)
                 let torres = []
                 for(let i=0; i<4; i++){
@@ -221,20 +220,19 @@
                     nodoPadre.agregarHijo(torre)
                     torres.push(torre)
                 }
-
-    
-
-
                 torres[0].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,2.25))
                 torres[1].setPosicion(vec3.fromValues(parametros.torres.separacionTorres/2,-7,-2.25))
                 torres[2].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,2.25))
                 torres[3].setPosicion(vec3.fromValues(-parametros.torres.separacionTorres/2,-7,-2.25))
-                /*
+         
+
                 // Creo todos arboles 
+                let materialTronco =  new PhongConNormalMap(gl,'./maps/madera.jpg','./maps/madera-normal map.jpg')
+                let materialhojas = new PhongConTextura(gl, './maps/hojas.jpg')
                 for(let i=0; i < randomToRange(20,35);i++){
                     
                     let arbol = randomToRange(0,2) < 0.5 ?  new Arbol(VarienteArbol.Pino):new Arbol()
-                    arbol.setMaterial(new Phong(gl))
+                    arbol.setMaterial(materialTronco,materialhojas)
                     let x = (i % 2 != 0) ? randomToRange(-25,-45) : randomToRange(30,45)
                     let z = randomToRange(-35,35)
                     while( z < 5 &&  z > -5 )  z = randomToRange(-35,35)
@@ -244,25 +242,7 @@
                     arbol.setEscala(vec3.fromValues(escala,escala,escala))
                     nodoPadre.agregarHijo(arbol)
                 }
-                
-                
-                // Creo el rio y barco con sus containers
-                nodoRioBarco = new Objeto3D()
-                nodoPadre.agregarHijo(nodoRioBarco)
-                nodoRioBarco.setPosicion(vec3.fromValues(0,parametros.rio.alturaAct,0))
 
-                let rio = new Plano(78.5,100)
-                rio.setMaterial(new Phong(gl))
-                rio.setColor(30/255,172/255,238/255)
-                nodoRioBarco.agregarHijo(rio)
-                rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
-
-                barco = new Barco()
-                barco.setMaterial(new Phong(gl))
-                barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
-                nodoRioBarco.agregarHijo(barco)
-                setInfoBarco(barco,nodoRioBarco)
-                */
                 // Creo los tentidos a los lados del puentes.
                 let tendido = new Tendido(carretera,parametros,gl)
                 nodoPadre.agregarHijo(tendido)
@@ -272,6 +252,26 @@
                 let tendido2 = new Tendido(carretera,parametros,gl)
                 nodoPadre.agregarHijo(tendido2)
                 tendido2.setPosicion(vec3.fromValues(0,0,-2.25))
+
+                
+                // Creo el rio y barco con sus containers
+                nodoRioBarco = new Objeto3D()
+                nodoPadre.agregarHijo(nodoRioBarco)
+                nodoRioBarco.setPosicion(vec3.fromValues(0,parametros.rio.alturaAct,0))
+
+
+                barco = new Barco(gl)
+                barco.setMaterial(new Phong(gl))
+                barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
+                nodoRioBarco.agregarHijo(barco)
+                setInfoBarco(barco,nodoRioBarco)
+
+
+                let rio = new Plano(78.5,100)
+                let materialRio = new PhongConNormalMap(gl,'./maps/aguaDeMar.jpg','./maps/agua-normal map.png')
+                rio.setMaterial(materialRio)
+                nodoRioBarco.agregarHijo(rio)
+                rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
                 
                 // SkyBox
                 var esfera = new Objeto3D()
@@ -322,12 +322,11 @@
             $('body').on("keydown",function(event){camara.handler(event)})
             
             function animate(){
-                /*
+                
                 if(posBarco <= -35){
                     posBarco = 35
                 }
                 barco.setPosicion(vec3.fromValues(0,0.5,posBarco-=offset))
-                */
                 mat4.identity(viewMatrix)
                 let view = camara.getViewParameters()
                 mat4.lookAt(viewMatrix, view.eye, view.center, view.up)

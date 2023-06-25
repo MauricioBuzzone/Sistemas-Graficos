@@ -1,36 +1,131 @@
-import {Curva, Bases} from '../util/curva.js'
-import { CurvaGenerica } from '../util/curvaGenerica.js';
 import { Modelo } from './modelo.js';
-
+import {Curva, Bases} from '../util/curva.js'
+import { Objeto3D } from '../util/objeto3D.js';
+import { CurvaGenerica } from '../util/curvaGenerica.js';
+import {SuperficieBarrido} from '../util/superficieBarrido.js'
+import {PhongConTextura} from '../materiales/phongConTextura.js'
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
 
 export class CascoBarco extends Modelo{
-    constructor(){
+    constructor(gl){
         super()
         this.stepPerfil = 0.1
         this.stepRecorrido = 1
-        
         this.setPerfil()
         this.setRecorrido()
+        this.setTapas(gl)
+        let mat = new PhongConTextura(gl,'./maps/oxido.jpg')
+        this.tapa1.setMaterial(mat)
+        this.tapa2.setMaterial(mat)
+        this.material = mat
     }
 
-    setPerfil(){
+
+
+    setTapas(gl){
+        let supBarrido = new SuperficieBarrido()
+        var puntos = this.recorrido.getDiscretizacion(this.stepRecorrido)
+        var recorridoTapa = []
+        let inicio = puntos[0].getCoords()[2]
+        let fin = puntos[puntos.length-1].getCoords()[2]
+
         let puntosDeControl = [
             vec3.fromValues(4,2,0),
             vec3.fromValues(0,2,0),
-            vec3.fromValues(-4,2,0),
+            vec3.fromValues(-4,2,0),  
             vec3.fromValues(-4,-2,0),
             vec3.fromValues(4,-2,0),
             vec3.fromValues(4,2,0),
         ]
-        this.perfil = new CurvaGenerica([
+        let perfilTapa = new CurvaGenerica([
+            
             new Curva(Bases.Bezier2,[
                 puntosDeControl[0],
                 puntosDeControl[1],
                 puntosDeControl[2],
             ]),
             
+            new Curva(Bases.Bezier3,[
+                puntosDeControl[2],
+                puntosDeControl[3],
+                puntosDeControl[4],
+                puntosDeControl[5],
+            ]),
+        ])
+
+        let tapa1 = mat4.fromValues(
+            0,0,0,0,
+            0,0,0,-1,
+            0,0,0,inicio,
+            0,0,0,1,
+        )
+        mat4.transpose(tapa1,tapa1)
+        recorridoTapa.push(tapa1)
+ 
+        tapa1 = mat4.fromValues(
+            -1,0,0,0,
+            0,1,0,0,
+            0,0,1,inicio,
+            0,0,0,1,
+        )
+        mat4.transpose(tapa1,tapa1)
+        recorridoTapa.push(tapa1)
+
+        this.tapa1 = new Objeto3D()
+        let tapaBuffers = supBarrido.getBuffersTapas(
+            perfilTapa.getDiscretizacion(this.stepPerfil),
+            recorridoTapa,2,2,1,0,-1)
+        this.tapa1.setGeometria(
+            tapaBuffers[0], // positionBuffer
+            tapaBuffers[1], // normalBuffer
+            tapaBuffers[2], // indexBuffer
+            tapaBuffers[3], // uvBuffer
+        )
+        this.agregarHijo(this.tapa1)
+
+
+        recorridoTapa = []
+        let tapa2 = mat4.fromValues(
+            -1,0,0,0,
+            0,1,0,0,
+            0,0,1,fin,
+            0,0,0,1,
+        )
+        mat4.transpose(tapa2,tapa2)
+        recorridoTapa.push(tapa2)
+
+        tapa2 = mat4.fromValues(
+            0,0,0,0,
+            0,0,0,-1,
+            0,0,0,fin,
+            0,0,0,1,
+        )
+        mat4.transpose(tapa2,tapa2)
+        recorridoTapa.push(tapa2)
+
+        this.tapa2 = new Objeto3D()
+        tapaBuffers = supBarrido.getBuffersTapas(
+            perfilTapa.getDiscretizacion(this.stepPerfil),
+            recorridoTapa,1,1,-1)
+        this.tapa2.setGeometria(
+            tapaBuffers[0], // positionBuffer
+            tapaBuffers[1], // normalBuffer
+            tapaBuffers[2], // indexBuffer
+            tapaBuffers[3], // uvBuffer
+        )
+        this.agregarHijo(this.tapa2)
+    }
+    setPerfil(){
+        let puntosDeControl = [
+            vec3.fromValues(4,2,0),
+            vec3.fromValues(0,2,0),
+            vec3.fromValues(-4,2,0),  
+            vec3.fromValues(-4,-2,0),
+            vec3.fromValues(4,-2,0),
+            vec3.fromValues(4,2,0),
+        ]
+        this.perfil = new CurvaGenerica([
             new Curva(Bases.Bezier3,[
                 puntosDeControl[2],
                 puntosDeControl[3],
@@ -56,39 +151,13 @@ export class CascoBarco extends Modelo{
         ])
         this.recorrido.setBiNormal(vec3.fromValues(-1,0,0))
     }
-    dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix, normal) {
-        if (this.buffers == null ){
-            this.buffers = this.supBarrido.getBuffers(
-                this.getPerfil(this.stepPerfil),
-                this.getRecorrido(this.stepRecorrido)
-            )
-            let cantCurvas = this.perfil.curvas.length
-            let disc = 1/this.stepPerfil +1
-            let sizeBuffer = this.buffers[1].length
-            for(let i=0; i< cantCurvas*disc*3*2 ;i+=3){
-                this.buffers[1][i] = 0
-                this.buffers[1][i+1] = 0
-                this.buffers[1][i+2] = -1
-
-
-                this.buffers[1][(sizeBuffer -1) - i] = 1
-                this.buffers[1][(sizeBuffer -1) - i -1] = 0
-                this.buffers[1][(sizeBuffer -1) - i -2] = 0
-
-            }
-            this.setGeometria(
-                this.buffers[0], // positionBuffer
-                this.buffers[1], // normalBuffer
-                this.buffers[2], // indexBuffer
-            )
-        }
-        super.dibujar(matPadre, gl, shaderProgram, viewMatrix, projMatrix, normal)
-    }
+ 
 
     getRecorrido(step){
+       
         var puntos = this.recorrido.getDiscretizacion(step)
         var recorrido = []
-        
+         /*
         let inicioBarco = puntos[0].getCoords()[2]
         let finBarco = puntos[puntos.length-1].getCoords()[2]
 
@@ -109,7 +178,7 @@ export class CascoBarco extends Modelo{
         )
         mat4.transpose(tapa1,tapa1)
         recorrido.push(tapa1)
-
+            */
         for(var i=0; i< puntos.length; i++){
 
             var biNormal = puntos[i].getBiNormal()
@@ -125,7 +194,7 @@ export class CascoBarco extends Modelo{
             
             recorrido.push(matrizLvli)
         }
-
+        /*
         let tapa2 = mat4.fromValues(
             -1,0,0,0,
             0,1,0,0,
@@ -143,7 +212,7 @@ export class CascoBarco extends Modelo{
         )
         mat4.transpose(tapa2,tapa2)
         recorrido.push(tapa2)
-
+            */
         return recorrido
     }
 }

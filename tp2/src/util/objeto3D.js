@@ -9,7 +9,9 @@ export class Objeto3D {
         this.normalBuffer = null;
         this.indexBuffer = null;
         this.uvBuffer = null;
-        this.color = [0.5,0.5,0.5]
+        this.tangBuffer = null;
+        this.binBuffer = null;
+
         this.hijos = [];
 
         this.posición = vec3.fromValues(0,0,0);
@@ -45,46 +47,18 @@ export class Objeto3D {
 
         if (this.positionBuffer &&  this.normalBuffer && this.indexBuffer && this.material){
             this.material.setUpConfing(gl,viewMatrix,projMatrix,m,eyePos)
+
+            this.material.setBuffers(
+                this.positionBuffer,
+                this.normalBuffer,
+                this.indexBuffer,
+                this.uvBuffer,
+                this.tangBuffer,
+                this.binBuffer
+                )
+
             var shaderProgram = this.material.getShaderProgram()
-
-            const trianglesVerticeBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positionBuffer), gl.STATIC_DRAW);    
-        
-            const trianglesNormalBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesNormalBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normalBuffer), gl.STATIC_DRAW);
-
-            const trianglesIndexBuffer = gl.createBuffer();
-            trianglesIndexBuffer.number_vertex_point = this.indexBuffer.length;
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indexBuffer), gl.STATIC_DRAW);
-
-        
-            const vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-            gl.enableVertexAttribArray(vertexPositionAttribute);
-            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
-            gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-            const vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-            gl.enableVertexAttribArray(vertexNormalAttribute);
-            gl.bindBuffer(gl.ARRAY_BUFFER, trianglesNormalBuffer);
-            gl.vertexAttribPointer(vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
-
-            if(this.uvBuffer){
-                const trianglesUVBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uvBuffer), gl.STATIC_DRAW);
-    
-                const vertexUVAttribute = gl.getAttribLocation(shaderProgram, "aTexcoord");
-                gl.enableVertexAttribArray(vertexUVAttribute);
-                gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
-                gl.vertexAttribPointer(vertexUVAttribute, 2, gl.FLOAT, false, 0, 0);
-            }
-
-            gl.drawElements( gl.TRIANGLE_STRIP, trianglesIndexBuffer.number_vertex_point, gl.UNSIGNED_SHORT, 0);    
+            this.material.draw()
             
             if(normal){
                 this.dibujarNormales(gl, shaderProgram)
@@ -141,12 +115,14 @@ export class Objeto3D {
     setColor(r,g,b){
         this.color = [r,g,b]
     }
-    setGeometria(posBuffer, nrmBuffer, indexBuffer, uvBuffer) {
+    setGeometria(posBuffer, nrmBuffer, indexBuffer, uvBuffer, tangBuffer, binBuffer) {
         // Método público para establecer los buffers de posición, normal e índice
         this.positionBuffer = posBuffer;
         this.normalBuffer = nrmBuffer;
         this.indexBuffer = indexBuffer;
         this.uvBuffer = uvBuffer;
+        this.tangBuffer = tangBuffer;
+        this.binBuffer= binBuffer
     }
 
     setPosicion(posición) {

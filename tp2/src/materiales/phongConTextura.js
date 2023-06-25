@@ -67,7 +67,7 @@ var fragmentShaderSource =
         vec3 diffuseColor = color * diffuse * u_lightColor;
         vec3 specularColor = u_specularColor * specular * u_lightColor;
 
-        vec3 finalColor = ambient + diffuseColor + specularColor ;
+        vec3 finalColor = ambient*color + diffuseColor + specularColor ;
 
         gl_FragColor = vec4(finalColor, 1.0);
     }
@@ -94,7 +94,6 @@ export class PhongConTextura extends Phong{
           
           // Limpia los recursos
           gl.bindTexture(gl.TEXTURE_2D, null);
-    
         };
         this.image.src = texture_file;
         this.initShaders(gl)
@@ -104,6 +103,47 @@ export class PhongConTextura extends Phong{
         this.gl.useProgram(this.shaderProgram)
         this.setMatrixUniforms(gl,viewMatrix,projMatrix,modelMatrix)
         this.setPhongComponent(eyePos)
+    }
+
+    setBuffers(positionBuffer,normalBuffer,indexBuffer,uvBuffer,tangBuffer,binBuffer){
+        const gl = this.gl
+        const shaderProgram = this.shaderProgram
+
+        const trianglesVerticeBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionBuffer), gl.STATIC_DRAW);    
+    
+        const trianglesNormalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesNormalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalBuffer), gl.STATIC_DRAW);
+
+        const trianglesIndexBuffer = gl.createBuffer();
+        trianglesIndexBuffer.number_vertex_point = indexBuffer.length;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexBuffer), gl.STATIC_DRAW);
+        
+        this.trianglesIndexBuffer = trianglesIndexBuffer
+    
+        const vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(vertexPositionAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        const vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+        gl.enableVertexAttribArray(vertexNormalAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesNormalBuffer);
+        gl.vertexAttribPointer(vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
+
+        const trianglesUVBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvBuffer), gl.STATIC_DRAW);
+
+        const vertexUVAttribute = gl.getAttribLocation(shaderProgram, "aTexcoord");
+        gl.enableVertexAttribArray(vertexUVAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
+        gl.vertexAttribPointer(vertexUVAttribute, 2, gl.FLOAT, false, 0, 0);
     }
 
 

@@ -5,6 +5,7 @@ var vertexShaderSource =
 
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
+    attribute vec3 aTexcoord;
 
     uniform mat4 modelMatrix;            
     uniform mat4 viewMatrix;
@@ -75,7 +76,7 @@ export class Phong {
         this.lightColor = [1,1,1]
         this.ambientColor = [0.25,0.25,0.25]
         this.diffuseColor = [0.15,0.15,0.15]
-        this.specularColor = [1,1,1]
+        this.specularColor = [0.5,0.5,0.5]
         this.shininess = 36
     }
 
@@ -83,6 +84,43 @@ export class Phong {
         this.gl.useProgram(this.shaderProgram)
         this.setMatrixUniforms(gl,viewMatrix,projMatrix,modelMatrix)
         this.setPhongComponent(eyePos)
+    }
+
+    draw(){
+        const gl = this.gl
+        gl.drawElements( gl.TRIANGLE_STRIP, this.trianglesIndexBuffer.number_vertex_point, gl.UNSIGNED_SHORT, 0);  
+    }
+
+    setBuffers(positionBuffer,normalBuffer,indexBuffer,uvBuffer,tangBuffer,binBuffer){
+        const gl = this.gl
+        const shaderProgram = this.shaderProgram
+
+        const trianglesVerticeBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionBuffer), gl.STATIC_DRAW);    
+    
+        const trianglesNormalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesNormalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalBuffer), gl.STATIC_DRAW);
+
+        const trianglesIndexBuffer = gl.createBuffer();
+        trianglesIndexBuffer.number_vertex_point = indexBuffer.length;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexBuffer), gl.STATIC_DRAW);
+
+        this.trianglesIndexBuffer = trianglesIndexBuffer
+    
+        const vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(vertexPositionAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        const vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+        gl.enableVertexAttribArray(vertexNormalAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesNormalBuffer);
+        gl.vertexAttribPointer(vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, trianglesIndexBuffer);
     }
 
     setConfig(lightPos,lightColor,ambientColor,diffuseColor,specularColor,shininess){

@@ -11,7 +11,8 @@ export class Plano extends Modelo{
         this.stepRecorrido = 0.5
         this.l1 = l1
         this.l2 = l2
-    
+        this.uFactor = 1
+        this.vFactor = 1
         this.setPerfil()
         this.setRecorrido()
     }

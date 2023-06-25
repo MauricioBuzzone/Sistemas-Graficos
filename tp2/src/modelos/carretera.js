@@ -3,6 +3,7 @@ import {CurvaGenerica} from '../util/curvaGenerica.js'
 import { Objeto3D } from '../util/objeto3D.js';
 import {SuperficieBarrido} from '../util/superficieBarrido.js'
 import {PhongConTextura} from '../materiales/phongConTextura.js'
+import {PhongConNormalMap} from '../materiales/phongConNormalMap.js'
 
 var vec3=glMatrix.vec3;
 var mat4=glMatrix.mat4;
@@ -18,16 +19,20 @@ export class Carretera extends Objeto3D{
         this.vereda = new Objeto3D()
         let perfilVereda = this.perfilVereda()
         let recorrido = this.recorrido(altura)
+        
         let veredaBuffers = supBarrido.getBuffers(
                                 perfilVereda.getDiscretizacion(stepPerfil),
                                 this.getRecorrido(recorrido,stepRecorrido),1,10)
+
         this.vereda.setGeometria(
             veredaBuffers[0], // positionBuffer
             veredaBuffers[1], // normalBuffer
             veredaBuffers[2], // indexBuffer
             veredaBuffers[3], // uvBuffer
+            veredaBuffers[4], // tangBuffer
+            veredaBuffers[5], // BinBuffer
         )
-        this.vereda.setMaterial(new PhongConTextura(gl,'./maps/concrete_wall_008_diff_1k.jpg'))
+        this.vereda.setMaterial(new PhongConNormalMap(gl,'./maps/concrete.jpg','./maps/vereda-normal.jpg'))
         this.agregarHijo(this.vereda)
 
 
@@ -41,8 +46,10 @@ export class Carretera extends Objeto3D{
             rutaBuffers[1], // normalBuffer
             rutaBuffers[2], // indexBuffer
             rutaBuffers[3], // uvBuffer
+            rutaBuffers[4], // tangBuffer
+            rutaBuffers[5], // BinBuffer
         )
-        this.ruta.setMaterial(new PhongConTextura(gl,'./maps/tramo-doblemarilla.jpg'))
+        this.ruta.setMaterial(new PhongConNormalMap(gl,'./maps/tramo-doblemarilla.jpg','./maps/tramo-doblemarilla-normal.png'))
         this.ruta.setPosicion(vec3.fromValues(0,-0.19,0))
         this.agregarHijo(this.ruta)
 

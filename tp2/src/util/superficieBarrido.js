@@ -15,10 +15,41 @@ export class SuperficieBarrido {
     let positionBuffer = this.getPositionBuffer()
     let normalBuffer = this.getNormalBuffer()
     let indexBuffer = this.getIndexBuffer()
-    let uvBuffer = recorrido ? this.getUVBuffer(uFactor,vFactor) : this.getUVBufferTapa(uFactor,vFactor)
-
-    return [positionBuffer,normalBuffer,indexBuffer,uvBuffer]
+    let uvBuffer = this.getUVBuffer(uFactor,vFactor)
+    let tangBuffer =  this.getTangBuffer()
+    let binBuffer =  this.getBiNormalBuffer()
+    
+    return [positionBuffer,normalBuffer,indexBuffer,uvBuffer,tangBuffer,binBuffer]
   }
+
+  getTangBuffer(){
+    let tangBuffer = []
+    for (let i = 0; i < this.recorrido.length; i++) {
+      let matrizDeNivel = this.recorrido[i];
+      for (let j = 0; j < this.poligono.length; j++) {
+        tangBuffer.push(matrizDeNivel[8])
+        tangBuffer.push(matrizDeNivel[9])
+        tangBuffer.push(matrizDeNivel[10])
+      }
+    }
+    return tangBuffer
+  }
+
+  getBiNormalBuffer(){
+    let binBuffer = []
+    for (let i = 0; i < this.recorrido.length; i++) {
+      for (let j = 0; j < this.poligono.length; j++) {
+        let tang = this.poligono[j].getTang();    
+
+        binBuffer.push(tang[0])
+        binBuffer.push(tang[1])
+        binBuffer.push(tang[2])
+      }
+
+    }
+    return binBuffer
+  }
+
 
   getPositionBuffer() {
       let positionBuffer = [];

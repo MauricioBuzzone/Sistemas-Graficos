@@ -3,8 +3,9 @@ import { Punto } from '../util/punto.js'
 import { Curva, Bases} from "../util/curva.js"
 import { CurvaGenerica } from "../util/curvaGenerica.js"
 import {PhongConTextura} from '../materiales/phongConTextura.js'
-import {Phong} from '../materiales/phong.js'
+import {PhongConNormalMap} from '../materiales/phongConNormalMap.js'
 import { Cilindro } from './cilindro.js'
+import { Tensor } from "./tensor.js";
 
 var vec3=glMatrix.vec3;
 export class Tendido extends Objeto3D{
@@ -61,8 +62,7 @@ export class Tendido extends Objeto3D{
         this.cable.setRecorrido(recorridoCable)
         this.cable.setRotacion([Math.PI/2,vec3.fromValues(0,1,0)])
         this.cable.setColor(240/255,60/255,60/255)
-        let material = new PhongConTextura(gl,'./maps/metal_wire.jpg')
-        material.setConfig([20,40,20],[0.75,0.75,0.75],[0.25,0.25,0.25],[1,0.0,0.0], [1,1,1],16)
+        let material =  new PhongConNormalMap(gl,'./maps/alambres.jpg','./maps/alambres-mormalmap.jpg')
         this.cable.setMaterial(material)
 
         super.agregarHijo(this.cable)
@@ -77,16 +77,16 @@ export class Tendido extends Objeto3D{
         let cantTensores = Math.floor((fin[2] - inicio[2])/parametros.tensores.separacionTensores)
         let step = 1/(cantTensores)
         this.tensores = []
-
-        let materialTensor = new Phong(gl)
-        materialTensor.setConfig([20,40,20],[0.0,0.0,0.0],[0.25,0.25,0.25],[1,0.0,0.0], [1,1,1],16)
-        for(let i=0; i<1;i+=step){
-
+        
+        let materialTensor =  new PhongConTextura(gl,'./maps/alambres.jpg')
+        materialTensor.setConfig([20,40,20],[0,0,0],[0.1,0.1,0.1],[0.0,0.0,0.0], [0,0,0],16)
+        for(let i=0; i<1;i+=step){  
+            
             let tope = recorridoCable.getPunto(i*4).getCoords()
             let u = getUforZ(puente,tope[2])
             let piso = puente.getPunto(u).getCoords()
 
-            let tensor = new Cilindro()
+            let tensor = new Tensor()
             tensor.setMaterial(materialTensor)
             
             this.tensores.push(tensor)
@@ -95,9 +95,9 @@ export class Tendido extends Objeto3D{
             tensor.setEscala(vec3.fromValues(0.5,0.5,tope[1]-piso[1]))
             tensor.setColor(1,1,1)
             super.agregarHijo(tensor)
-
+            
         }
-
+        
         function  getUforZ(curva,z){    
             let x1 = curva.puntosDeControl[0][2]
             let x2 = curva.puntosDeControl[1][2]

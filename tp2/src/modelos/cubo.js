@@ -10,6 +10,8 @@ export class Cubo extends Modelo{
         super()
         this.stepPerfil = 1
         this.stepRecorrido = 1
+        this.uFactor = 4
+        this.vFactor = 1
         this.l1 = l1
         this.l2 = l2
         this.l3 = l3
