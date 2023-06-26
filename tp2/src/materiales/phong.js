@@ -72,7 +72,7 @@ export class Phong {
         this.gl = gl
         this.shaderProgram = this.initShaders(gl)
 
-        this.lightPos = [20,40,20]
+        this.lightPos = [20,70,20]
         this.lightColor = [1,1,1]
         this.ambientColor = [0.25,0.25,0.25]
         this.diffuseColor = [0.15,0.15,0.15]

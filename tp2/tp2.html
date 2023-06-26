@@ -94,6 +94,7 @@
             import {Phong} from './src/materiales/phong.js'
             import {PhongConTextura} from './src/materiales/phongConTextura.js'
             import {PhongConNormalMap} from './src/materiales/phongConNormalMap.js'
+            import {Agua} from './src/materiales/agua.js'
 
             var mat4=glMatrix.mat4;
             var vec3=glMatrix.vec3;
@@ -266,12 +267,6 @@
                 nodoRioBarco.agregarHijo(barco)
                 setInfoBarco(barco,nodoRioBarco)
 
-
-                let rio = new Plano(78.5,100)
-                let materialRio = new PhongConNormalMap(gl,'./maps/aguaDeMar.jpg','./maps/agua-normal map.png')
-                rio.setMaterial(materialRio)
-                nodoRioBarco.agregarHijo(rio)
-                rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
                 
                 // SkyBox
                 var esfera = new Objeto3D()
@@ -280,6 +275,28 @@
                 esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2],buffersEsfera[3]) 
                 esfera.setEscala(vec3.fromValues(80,80,80))
                 nodoPadre.agregarHijo(esfera)
+
+
+
+                let materialRio = new Agua(gl,'./maps/sky_lightblue-square.jpg','./maps/agua-normal map.png')
+
+                /*
+                var esfera = new Objeto3D()
+                esfera.setMaterial(materialRio)
+                var buffersEsfera = crearGeometria("esfera",40,40)
+                esfera.setGeometria(buffersEsfera[0],buffersEsfera[1],buffersEsfera[2],buffersEsfera[3]) 
+                esfera.setEscala(vec3.fromValues(5,5,5))
+                nodoPadre.agregarHijo(esfera)
+                */
+
+
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+                let rio = new Plano(80,80)
+                rio.setMaterial(materialRio)
+                nodoRioBarco.agregarHijo(rio)
+                rio.setRotacion([-Math.PI/2,vec3.fromValues(0,0,1)])
 
             }
 
