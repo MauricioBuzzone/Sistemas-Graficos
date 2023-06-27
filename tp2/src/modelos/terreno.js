@@ -43,7 +43,8 @@ export class Terreno{
         let positionBuffer = []
         let normalBuffer = []
         let indexBuffer = []
-
+        let tangBuffer = []
+        let binBuffer = []
         for(let i=0; i < matrizlvl.length; i++){
             let polLvli = []
             //Corro todo los puntos de control hacia un lado.
@@ -76,6 +77,19 @@ export class Terreno{
 
             
             let discrtizacionPerfil = curvalvli.getDiscretizacion(perfilStep) 
+            
+            for (let j = 0; j < discrtizacionPerfil.length; j++) {
+                let tang = discrtizacionPerfil[j].getTang();    
+        
+                binBuffer.push(tang[0])
+                binBuffer.push(tang[1])
+                binBuffer.push(tang[2])
+
+                tangBuffer.push(matrizlvl[i][8])
+                tangBuffer.push(matrizlvl[i][9])
+                tangBuffer.push(matrizlvl[i][10])
+              }
+
             let supBarrido = new SuperficieBarrido(discrtizacionPerfil,[matrizlvl[i]])
             let posBuf = supBarrido.getPositionBuffer()
             let norBuf = supBarrido.getNormalBuffer()
@@ -107,14 +121,15 @@ export class Terreno{
             uvBuffer.push(u)
             uvBuffer.push(v)
         }
-        //console.log(uvBuffer)
-
         this.objeto3d.setGeometria(
             positionBuffer,
             normalBuffer,
             indexBuffer,
-            uvBuffer
+            uvBuffer,
+            tangBuffer,
+            binBuffer
         )
+
     }
 
     getRecorrido(step){

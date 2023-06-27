@@ -6,7 +6,11 @@ var vertexShaderSource =
 
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
+    attribute vec3 aVertexTang;
+    attribute vec3 aVertexBiNormal;
+
     attribute vec2 aTexcoord;
+
 
     uniform mat4 modelMatrix;            
     uniform mat4 viewMatrix;
@@ -15,13 +19,20 @@ var vertexShaderSource =
 
     varying vec3 vPosWorld;
     varying vec3 vNormal;
+    varying vec3 vTang;
+    varying vec3 vBiNormal;
+
     varying vec2 vTexcoord;
+
     void main() {
 
         gl_Position = projMatrix * viewMatrix * modelMatrix  * vec4(aVertexPosition, 1.0);
 
         vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz;    //la posicion en coordenadas de mundo
-        vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz;       //la normal en coordenadas de mundo       
+        vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz;       //la normal en coordenadas de mundo 
+        vTang = (normalMatrix*vec4(aVertexTang,1.0)).xyz;           //la tangente en coordenadas de mundo
+        vBiNormal = (normalMatrix*vec4(aVertexBiNormal,1.0)).xyz;   //la binormal en coordenadas de mundo 
+
         vTexcoord = aTexcoord;
     }
 `
@@ -31,12 +42,25 @@ var fragmentShaderSource =
 
     varying vec3 vPosWorld;
     varying vec3 vNormal;
-    varying highp vec2 vTexcoord;
+    varying vec3 vTang;
+    varying vec3 vBiNormal;
 
+    varying vec2 vTexcoord;
     
     uniform sampler2D uSampler0;
     uniform sampler2D uSampler1;
     uniform sampler2D uSampler2;
+    uniform sampler2D uSampler3;
+    
+
+    uniform vec3 u_eyePos;
+    uniform vec3 u_lightPos;
+    uniform vec3 u_lightColor;
+    uniform vec3 u_ambientColor;
+    uniform vec3 u_diffuseColor;
+    uniform vec3 u_specularColor;
+    uniform float u_shininess;
+
     
     // Perlin Noise						
                 
@@ -188,44 +212,114 @@ var fragmentShaderSource =
        
        // combino color1 (tierra y rocas) con color2 a partir de la mascara2
        vec3 color=mix(color1,color2,mask2);			   
-                      
+              
+
+       vec3 normal = vNormal;
+
+       vec3 colorTerreno = vec3(1.0,1.0,1.0);
         if (vPosWorld.y > -1.4){
-            gl_FragColor = vec4(pasto,1.0);
+            colorTerreno = pasto;
         }
 
         else if (-1.5 < vPosWorld.y && vPosWorld.y < -1.4){
+
             float procentaje = 1.0-(vPosWorld.y + 1.5)/(-1.4+1.5);
 
             vec3 mixPascoRoca=mix(mix(pasto1,pasto2,0.5),roca,procentaje);
-            gl_FragColor = vec4(mixPascoRoca,1.0);
+            colorTerreno = mixPascoRoca;
         }
         
         else if (-2.0 < vPosWorld.y && vPosWorld.y < -1.5){
-            gl_FragColor = vec4(roca,1.0);
+            // Calculo Normal
+            vec3 localNormal = texture2D(uSampler3, vTexcoord).xyz;
+        
+            /* Transform */
+            normal = normalize ( localNormal.rgb * 2.0 - 1.0);;
+            normal = normalize( mat3 (vTang, vBiNormal, vNormal)* normal);
+        
+
+            colorTerreno = roca;
         }
         else if (-3.0 < vPosWorld.y && vPosWorld.y < -2.0){
+            float mask=mix(mix(noise1,noise2,0.5),noise3,0.3);		
+            mask=smoothstep(-0.1,0.1,mask);
+            // Calculo Normal
+            vec3 localNormal = texture2D(uSampler3, vTexcoord).xyz;
+
+            /* Transform */
+            normal = normalize ( localNormal.rgb * 2.0 - 1.0);;
+            normal = normalize( mat3 (vTang, vBiNormal, vNormal)* normal);
+            normal = mix(vNormal,normal,mask);
+            
             float procentaje = 1.0-(vPosWorld.y + 3.0)/(-2.0+3.0);
 
             vec3 mixTierraRoca=mix(roca,color2,procentaje);
-            gl_FragColor = vec4(mixTierraRoca,1.0);
+            colorTerreno = mixTierraRoca;
         }
         else if (-4.0 < vPosWorld.y && vPosWorld.y < -3.0){
-            gl_FragColor = vec4(color2,1.0);
+
+                   
+            float mask=mix(mix(noise1,noise2,0.5),noise3,0.3);		
+            mask=smoothstep(-0.1,0.1,mask);
+            // Calculo Normal
+            vec3 localNormal = texture2D(uSampler3, vTexcoord).xyz;
+
+            /* Transform */
+            normal = normalize ( localNormal.rgb * 2.0 - 1.0);;
+            normal = normalize( mat3 (vTang, vBiNormal, vNormal)* normal);
+            normal = mix(vNormal,normal,mask);
+
+            colorTerreno = color2;
         }
 
         else if (-5.0 < vPosWorld.y && vPosWorld.y < -4.0){
+
+            float mask=mix(mix(noise1,noise2,0.5),noise3,0.3);		
+            mask=smoothstep(-0.1,0.1,mask);
+            // Calculo Normal
+            vec3 localNormal = texture2D(uSampler3, vTexcoord).xyz;
+
+            /* Transform */
+            normal = normalize ( localNormal.rgb * 2.0 - 1.0);;
+            normal = normalize( mat3 (vTang, vBiNormal, vNormal)* normal);
+            normal = mix(vNormal,normal,mask);
+
+
             float procentaje = 1.0-(vPosWorld.y + 5.0)/(-4.0+5.0);
 
             vec3 mixTierraRoca=mix(color2,tierra1,procentaje);
-            gl_FragColor = vec4(mixTierraRoca,1.0);
+            colorTerreno = mixTierraRoca;
         }
         else {
-            gl_FragColor = vec4(tierra1,1.0);
+            colorTerreno = tierra1;
         }
+        
+        vec3 lightVec = normalize(u_lightPos - vPosWorld);
+        vec3 viewDir = normalize(u_eyePos - vPosWorld);
 
-      
+        // Compute the diffuse term
+        float diffuse = max(dot(normal,lightVec), 0.0);
 
-       //gl_FragColor = vec4(mask1,mask1,mask1,1.0);			   
+        // Compute the specular term
+        vec3 reflectDir = reflect(-lightVec, normal);
+        float specAngle = max(dot(reflectDir, viewDir), 0.0);
+        float specular = pow(specAngle, u_shininess);
+        
+        //float viewAngle = max(dot(normal,lightVec), 0.0);
+        //vec3 reflection = normalize(2.0*viewAngle*normal - lightVec);
+        //float specular = pow(max(dot(reflection, viewDir), 0.0), u_shininess);
+
+        // Compute the final color
+        vec3 ambient = u_ambientColor;
+
+       
+        vec3 diffuseColor = colorTerreno * diffuse * u_lightColor;
+        vec3 specularColor = u_specularColor * specular * u_lightColor;
+
+        vec3 finalColor = ambient*color + diffuseColor +specularColor;
+
+        gl_FragColor = vec4(finalColor,1.0);			   
+        //gl_FragColor = vec4(mask1,mask1,mask1,1.0);			   
        
        
     }
@@ -239,6 +333,9 @@ export class PhongTerreno extends Phong{
         var grass_file = './maps/pasto1.jpg'
         var rock_file = './maps/rocas2.jpg'
         var dirt_file = './maps/tierra1.jpg'
+        var rockNormalMap_file = './maps/rocas2-normalmap.jpg'
+        this.specularColor = [0.25,0.25,0.25]
+        this.shininess = 12
         this.grass =  new Image();
         this.grass.onload = () => {
           this.grasstexture = gl.createTexture();
@@ -299,6 +396,26 @@ export class PhongTerreno extends Phong{
         };
         this.dirt.src = dirt_file;
 
+        this.rockNormalMap =  new Image();
+        this.rockNormalMap.onload = () => {
+          this.rockNormalMaptexture = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, this.rockNormalMaptexture);
+    
+          // Configura los parámetros de la textura
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    
+          // Carga la imagen en la textura
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.rockNormalMap);
+          
+          // Limpia los recursos
+          gl.bindTexture(gl.TEXTURE_2D, null);
+    
+        };
+        this.rockNormalMap.src = rockNormalMap_file;
+
         this.initShaders(gl)
     }
 
@@ -347,6 +464,25 @@ export class PhongTerreno extends Phong{
         gl.enableVertexAttribArray(vertexUVAttribute);
         gl.bindBuffer(gl.ARRAY_BUFFER, trianglesUVBuffer);
         gl.vertexAttribPointer(vertexUVAttribute, 2, gl.FLOAT, false, 0, 0);
+
+        const trianglesTangBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesTangBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tangBuffer), gl.STATIC_DRAW);    
+    
+        const trianglesBiNormalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesBiNormalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(binBuffer), gl.STATIC_DRAW);
+
+
+        const vertexTangAttribute = gl.getAttribLocation(shaderProgram, "aVertexTang");
+        gl.enableVertexAttribArray(vertexTangAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesTangBuffer);
+        gl.vertexAttribPointer(vertexTangAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        const vertexBiNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexBiNormal");
+        gl.enableVertexAttribArray(vertexBiNormalAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesBiNormalBuffer);
+        gl.vertexAttribPointer(vertexBiNormalAttribute, 3, gl.FLOAT, false, 0, 0);
     }
 
 
@@ -381,6 +517,16 @@ export class PhongTerreno extends Phong{
 
         // Asigna la unidad de textura al uniforme del fragment shader
         gl.uniform1i(dirt, 0);
+
+
+        var rockNormal = gl.getUniformLocation(this.shaderProgram, 'uSampler3');
+
+        // Activa la textura en una unidad de textura específica (por ejemplo, unidad 0)
+        gl.activeTexture(gl.TEXTURE3);
+        gl.bindTexture(gl.TEXTURE_2D, this.rockNormalMaptexture);
+
+        // Asigna la unidad de textura al uniforme del fragment shader
+        gl.uniform1i(rockNormal, 3);
     }
 
     initShaders(gl) {
